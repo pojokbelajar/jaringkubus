@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#076b5c">
+  <meta name="description" content="Laboratorium interaktif untuk mempelajari jaring-jaring kubus dengan animasi 3D membuka, melipat, dan memutar.">
+  <title>Laboratorium Jaring-Jaring Kubus | MTsN 3 Balangan</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23076b5c'/%3E%3Cpath d='m32 9 22 12v23L32 56 10 44V21z' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='m10 21 22 13 22-13M32 34v22' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3C/svg%3E">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --green: #08725f;
+      --deep: #063c36;
+      --forest: #0f5149;
+      --mint: #def5ed;
+      --cream: #f7faf6;
+      --ink: #172b2a;
+      --secondary: #5c7370;
+      --line: #dce9e5;
+      --shadow: 0 16px 48px rgba(22, 76, 64, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: radial-gradient(circle at 3% 3%, #e1f7ed, transparent 40%), radial-gradient(circle at 92% 12%, #e5f1fc, transparent 30%), #f7faf8; line-height: 1.55; }
+    button, select, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #e0aa39; outline-offset: 3px; }
+    .topbar { background: rgba(255,255,255,.95); border-bottom: 1px solid #e5eeeb; }
+    .topbar-inner { max-width: 1240px; margin: auto; padding: 15px 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 43px; height: 43px; border-radius: 13px; background: var(--green); display: grid; place-items: center; color: white; flex-shrink: 0; box-shadow: 0 6px 18px #08725f2b; }
+    .brand-title { font-size: 13px; font-weight: 850; letter-spacing: .04em; line-height: 1.4; }
+    .brand-sub { font-size: 12px; color: var(--secondary); }
+    .top-tag { display: inline-flex; align-items: center; gap: 8px; color: var(--green); font-size: 12px; font-weight: 750; background: #edf9f3; border: 1px solid #d5eee4; padding: 8px 13px; border-radius: 30px; white-space: nowrap; }
+    .top-tag:before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #23a476; box-shadow: 0 0 0 3px #ccefdf; }
+    main { max-width: 1240px; margin: auto; padding: 32px 26px 56px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: 11px; font-weight: 850; color: var(--green); margin: 0 0 10px; }
+    h1 { margin: 0; color: var(--deep); font-size: clamp(26px, 3.6vw, 41px); letter-spacing: -.038em; line-height: 1.17; font-weight: 850; }
+    .lead { font-size: 14px; max-width: 700px; color: var(--secondary); margin: 13px 0 27px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 18px; align-items: start; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 19px; box-shadow: var(--shadow); overflow: hidden; }
+    .lab-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 15px; gap: 12px; }
+    .section-title { font-size: 17px; color: var(--deep); line-height: 1.3; margin: 0; font-weight: 800; }
+    .section-small { margin: 4px 0 0; color: var(--secondary); font-size: 12px; }
+    .state-chip { border-radius: 30px; padding: 6px 11px; background: #ecf9f1; color: #08725f; font-size: 11px; border: 1px solid #d6eee2; white-space: nowrap; font-weight: 800; }
+    .stage { position: relative; height: clamp(390px, 43vw, 530px); margin: 0 15px; background: radial-gradient(ellipse at center, #ffffff 8%, #f2f8f6 70%, #ecf4f1 100%); border: 1px solid #e7f0eb; border-radius: 15px; overflow: hidden; isolation: isolate; }
+    .stage::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(#dbe9e655 1px,transparent 1px),linear-gradient(90deg,#dbe9e655 1px,transparent 1px); background-size: 29px 29px; mask-image: radial-gradient(ellipse, #0006 0%, transparent 78%); pointer-events: none; }
+    #canvasHost { width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; }
+    #canvasHost canvas { display: block; cursor: grab; outline: none; }
+    #canvasHost canvas:active { cursor: grabbing; }
+    .stage-note { z-index: 2; position: absolute; bottom: 13px; left: 13px; right: 13px; padding: 9px 12px; color: #47645e; background: #ffffffea; border: 1px solid #e5ede9; border-radius: 10px; font-size: 11px; text-align: center; pointer-events: none; }
+    .stage-label { position: absolute; z-index: 2; top: 13px; left: 13px; font-size: 11px; font-weight: 800; border-radius: 8px; padding: 7px 10px; background: #ffffffee; color: var(--deep); border: 1px solid #e5efeb; pointer-events: none; }
+    .loading-cover { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; position: absolute; inset: 0; z-index: 4; background: #f4faf7; color: var(--green); font-size: 13px; text-align: center; padding: 20px; }
+    .loading-cover.hidden { display: none; }
+    .spinner { width: 29px; height: 29px; border: 3px solid #d8eee4; border-top-color: var(--green); border-radius: 50%; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .controls { padding: 18px 22px 22px; }
+    .controls-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 9px; }
+    .controls-heading label { font-size: 12px; font-weight: 850; color: #35524a; }
+    .percent { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 850; color: var(--green); }
+    .range-wrap { display: flex; align-items: center; gap: 11px; }
+    .edge-label { font-size: 11px; color: var(--secondary); white-space: nowrap; }
+    input[type=range] { accent-color: var(--green); width: 100%; cursor: pointer; }
+    .control-row { display: flex; gap: 9px; align-items: stretch; flex-wrap: wrap; margin-top: 17px; }
+    .btn { border-radius: 10px; border: 1px solid #cbded5; background: white; color: var(--forest); padding: 12px 14px; font-size: 12px; font-weight: 850; min-height: 44px; display: inline-flex; justify-content: center; align-items: center; gap: 7px; transition: background .18s, transform .18s; }
+    .btn:hover { background: #f0f8f3; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--green); color: white; border-color: var(--green); }
+    .btn-primary:hover { background: #075b4d; }
+    .btn-auto.is-active { background: #e8f6ef; border-color: #75bba3; }
+    .grow { flex: 1; }
+    .speed-label { font-size: 12px; font-weight: 750; align-self: center; color: var(--secondary); margin-left: auto; }
+    .speed { min-height: 44px; padding: 0 8px; border: 1px solid #cbded5; border-radius: 10px; color: var(--deep); background: #fff; font-size: 12px; font-weight: 700; }
+    .aside { display: flex; flex-direction: column; gap: 16px; }
+    .aside-card { padding: 21px; }
+    .aside-heading { color: var(--deep); font-size: 16px; margin: 0 0 13px; font-weight: 850; }
+    .steps { display: grid; gap: 14px; }
+    .step { display: flex; gap: 11px; align-items: start; }
+    .step-index { flex-shrink: 0; display: grid; place-items: center; border-radius: 9px; height: 27px; width: 27px; background: #e8f6f0; color: var(--green); font-size: 12px; font-weight: 900; }
+    .step p { font-size: 12px; color: var(--secondary); margin: 0; }
+    .step strong { display: block; font-size: 12px; color: #26423b; margin-bottom: 2px; }
+    .discover-card { background: linear-gradient(140deg,#0c7664,#06463e); padding: 22px; color: #fff; border: none; }
+    .discover-card .aside-heading { color: white; }
+    .discover-card p { color: #e0f5ed; font-size: 12px; margin: 0; }
+    .discovery-result { display: block; margin-top: 13px; background: #ffffff18; padding: 12px 13px; border-radius: 11px; border: 1px solid #ffffff35; min-height: 80px; }
+    .discovery-result strong { font-size: 13px; }
+    .discovery-result span { display: block; color: #e0f5ed; font-size: 11px; margin-top: 5px; }
+    .hint { display: flex; gap: 10px; align-items: start; border: 1px dashed #b7d9c6; background: #f5fbf7; padding: 13px; border-radius: 13px; margin-top: 14px; font-size: 12px; color: #436158; }
+    .hint .bulb { font-size: 19px; line-height: 1.2; }
+    .foot { text-align: center; color: #78918a; font-size: 11px; margin: 25px auto 0; }
+    /* Tahap 2A — gerbang token & petunjuk kegiatan */
+    [hidden] { display: none !important; }
+    .login-wrap { max-width: 1120px; margin: 0 auto; padding: 48px 26px 58px; min-height: calc(100vh - 75px); display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(330px, .88fr); align-items: center; gap: 34px; }
+    .login-illustration { min-width: 0; }
+    .login-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: #e5f5eb; border-radius: 99px; color: var(--green); font-size: 11px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+    .login-illustration h1 { margin: 18px 0 14px; max-width: 550px; font-size: clamp(31px, 4.5vw, 53px); }
+    .login-illustration .login-lead { color: var(--secondary); font-size: 15px; max-width: 460px; margin: 0 0 24px; }
+    .preview-card { max-width: 430px; display: flex; align-items: center; gap: 17px; border: 1px solid #d7e9df; background: #ffffffd9; border-radius: 18px; padding: 18px; box-shadow: var(--shadow); }
+    .net-preview { display: grid; grid-template-columns: repeat(3, 24px); grid-template-rows: repeat(4, 24px); gap: 2px; flex-shrink: 0; }
+    .net-square { display: grid; place-items: center; background: #a8e5d3; border: 1px solid #5fbaa3; border-radius: 3px; font-size: 11px; font-weight: 850; color: #185347; }
+    .net-square:nth-child(1) { grid-area: 1 / 2; }
+    .net-square:nth-child(2) { grid-area: 1 / 1; }
+    .net-square:nth-child(3) { grid-area: 1 / 3; }
+    .net-square:nth-child(4) { grid-area: 2 / 2; background: #bbd8fb; border-color: #98bee8; }
+    .net-square:nth-child(5) { grid-area: 3 / 2; background: #f9d4b7; border-color: #eabb92; }
+    .net-square:nth-child(6) { grid-area: 4 / 2; background: #ddd4fb; border-color: #bfb2ee; }
+    .preview-copy strong { display: block; color: var(--deep); font-size: 14px; margin-bottom: 5px; }
+    .preview-copy span { display: block; color: var(--secondary); font-size: 12px; line-height: 1.6; }
+    .login-card { padding: 30px; }
+    .login-icon { display: grid; place-items: center; width: 49px; height: 49px; background: #eaf7f0; color: var(--green); border-radius: 15px; margin-bottom: 16px; }
+    .login-card h2 { font-size: 23px; line-height: 1.2; letter-spacing: -.02em; color: var(--deep); margin: 0 0 8px; }
+    .login-card p { margin: 0; font-size: 13px; color: var(--secondary); }
+    .login-form { margin-top: 26px; }
+    .login-form label { display: block; color: #304b44; font-size: 12px; font-weight: 850; margin-bottom: 8px; }
+    .token-field { display: flex; gap: 7px; align-items: stretch; }
+    .token-field input { min-width: 0; width: 100%; border: 1px solid #c9ded3; border-radius: 10px; background: white; padding: 12px 13px; font-size: 15px; font-weight: 700; letter-spacing: .07em; color: var(--deep); }
+    .token-field input::placeholder { font-size: 13px; font-weight: 400; letter-spacing: 0; }
+    .token-toggle { border: 1px solid #c9ded3; border-radius: 10px; color: var(--forest); background: #f4faf7; padding: 0 12px; font-size: 11px; font-weight: 800; min-width: 86px; }
+    .login-submit { width: 100%; margin-top: 16px; min-height: 48px; font-size: 13px; }
+    .login-error { margin: 10px 0 0 !important; padding: 10px 12px; border: 1px solid #f2c2bd; background: #fff2f0; color: #a1382c !important; border-radius: 9px; font-weight: 650; }
+    .demo-note { background: #fffaed; border: 1px solid #f0ddb0; color: #80601e; font-size: 11px; line-height: 1.65; border-radius: 12px; padding: 13px 14px; margin-top: 20px; }
+    .demo-note strong { color: #6d4c11; }
+    .demo-note code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; background: #fcebc6; border-radius: 5px; padding: 2px 5px; font-size: 12px; font-weight: 800; }
+    .lesson { margin-top: 21px; }
+    .lesson-head { padding: 22px 24px 14px; }
+    .lesson-head h2 { margin: 0; color: var(--deep); font-size: 19px; }
+    .lesson-head p { margin: 7px 0 0; color: var(--secondary); font-size: 12px; }
+    .lesson-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; padding: 0 24px 24px; }
+    .lesson-steps { display: grid; gap: 10px; }
+    .lesson-step { display: flex; gap: 12px; align-items: start; background: #f6faf8; border: 1px solid #e4eeea; border-radius: 12px; padding: 12px; }
+    .lesson-step-index { display: grid; place-items: center; width: 27px; height: 27px; background: #dff3e9; color: var(--green); border-radius: 9px; font-size: 12px; font-weight: 850; flex-shrink: 0; }
+    .lesson-step strong { display: block; font-size: 13px; color: var(--deep); }
+    .lesson-step p { margin: 4px 0 0; color: var(--secondary); font-size: 12px; }
+    .lesson-goal { background: #f1f9f4; border: 1px solid #d9eadf; border-radius: 14px; padding: 18px; }
+    .lesson-goal h3 { font-size: 14px; margin: 0 0 10px; color: var(--deep); }
+    .lesson-goal ul { margin: 0; padding-left: 18px; color: #385950; font-size: 12px; line-height: 1.8; }
+    .lesson-pending { border-radius: 11px; background: #fff; padding: 12px; margin-top: 17px; border: 1px dashed #aacdba; }
+    .lesson-pending strong { display: block; color: var(--green); font-size: 12px; }
+    .lesson-pending span { display: block; margin-top: 5px; color: var(--secondary); font-size: 11px; }
+    .header-end { display: flex; align-items: center; gap: 11px; }
+    .btn-exit { border: 1px solid #d5e7de; border-radius: 9px; background: #fff; color: var(--forest); padding: 8px 12px; font-size: 11px; font-weight: 800; }
+    @media (max-width: 850px) { .login-wrap { grid-template-columns: 1fr; max-width: 600px; gap: 25px; padding: 35px 18px 45px; min-height: unset; } .login-illustration h1 { font-size: 37px; } .lesson-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .login-wrap { padding: 25px 12px 40px; gap: 20px; } .login-illustration h1 { font-size: 32px; } .login-illustration .login-lead { font-size: 13px; } .login-card { padding: 22px 19px; } .preview-card { padding: 13px; } .login-card h2 { font-size: 21px; } .lesson-head { padding: 18px 16px 12px; } .lesson-grid { padding: 0 16px 16px; gap: 13px; } .header-end { gap: 6px; } .btn-exit { padding: 7px 9px; } .top-tag { display: none; } }
+    @media (max-width: 950px) { .layout { grid-template-columns: minmax(0, 1fr); } .aside { display: grid; grid-template-columns: 1fr 1fr; } .stage { height: 510px; } }
+    @media (max-width: 600px) {
+      .topbar-inner { padding: 12px 15px; }
+      .top-tag { padding: 7px 9px; font-size: 10px; }
+      .brand-title { font-size: 11px; }
+      .brand-sub { font-size: 10px; }
+      .brand-icon { width: 39px; height: 39px; }
+      main { padding: 25px 11px 36px; }
+      .intro { padding: 0 8px; }
+      .lead { font-size: 13px; margin-bottom: 20px; }
+      .card { border-radius: 16px; }
+      .lab-header { padding: 16px 14px 12px; }
+      .section-title { font-size: 15px; }
+      .section-small { font-size: 11px; }
+      .state-chip { font-size: 10px; padding: 5px 8px; }
+      .stage { margin: 0 8px; height: min(118vw, 480px); min-height: 390px; }
+      .stage-note { font-size: 10px; }
+      .controls { padding: 16px 14px 18px; }
+      .edge-label { font-size: 10px; }
+      .btn { padding: 11px 10px; }
+      .btn-auto { flex-basis: 100%; }
+      .aside { grid-template-columns: 1fr; }
+      .aside-card { padding: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+    /* Tahap 2B/2D — formulir pengumpulan karya */
+    .submission { margin-top: 22px; }
+    .submission-header { padding: 24px 25px 16px; display: flex; align-items: flex-start; gap: 13px; }
+    .submission-header h2 { margin: 0; color: var(--deep); font-size: 20px; }
+    .submission-header p { color: var(--secondary); font-size: 12px; margin: 6px 0 0; max-width: 680px; }
+    .submission-icon { height: 42px; width: 42px; flex-shrink: 0; display: grid; place-items: center; border-radius: 13px; background: #e4f5eb; font-size: 23px; }
+    .submission-body { padding: 0 25px 25px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .form-field { min-width: 0; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-label { display: block; font-size: 12px; font-weight: 800; color: #304b44; margin-bottom: 7px; }
+    .form-label .required { color: #bd5b2d; }
+    .form-control { width: 100%; height: 46px; padding: 10px 12px; color: var(--ink); background: #fff; border: 1px solid #c9dcd3; border-radius: 11px; font-size: 14px; }
+    .form-control:disabled { background: #f1f5f3; color: #879791; cursor: not-allowed; }
+    .form-control::placeholder { color: #899b96; }
+    .form-help { display: block; margin-top: 6px; font-size: 11px; color: var(--secondary); }
+    .form-divider { height: 1px; background: #e6eeeb; margin: 22px 0 17px; }
+    .upload-heading { font-size: 15px; color: var(--deep); margin: 0 0 4px; }
+    .upload-intro { margin: 0 0 13px; font-size: 12px; color: var(--secondary); }
+    .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; }
+    .photo-card { min-width: 0; border: 1px solid #dce9e2; border-radius: 14px; background: #fbfdfb; padding: 15px; }
+    .photo-card h4 { margin: 0 0 5px; font-size: 13px; color: #26483c; }
+    .photo-card p { margin: 0 0 12px; font-size: 11px; color: var(--secondary); min-height: 34px; }
+    .photo-card input[type=file] { max-width: 100%; width: 100%; font-size: 12px; color: #355950; }
+    .photo-card input[type=file]::file-selector-button { border: 1px solid #bad8c7; border-radius: 8px; background: #eaf7ef; font: inherit; font-weight: 800; color: var(--green); padding: 9px 11px; margin-right: 10px; cursor: pointer; }
+    .photo-visual { width: 100%; aspect-ratio: 16 / 10; border: 1px dashed #c8dcd0; background: #f0f7f2; display: grid; place-items: center; margin-top: 13px; border-radius: 11px; overflow: hidden; }
+    .photo-visual img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .photo-placeholder { display: grid; text-align: center; gap: 5px; color: #88a59a; font-size: 11px; padding: 15px; }
+    .photo-placeholder span { font-size: 28px; }
+    .photo-meta { color: var(--secondary); font-size: 11px; margin-top: 9px; min-height: 18px; overflow-wrap: anywhere; }
+    .photo-meta[data-kind="error"] { color: #ad3329; font-weight: 700; }
+    .photo-meta[data-kind="success"] { color: #08725f; font-weight: 700; }
+    .form-alert { border-radius: 11px; padding: 12px 14px; margin-top: 18px; font-size: 12px; background: #eef7ef; color: #27654d; border: 1px solid #d6ebdb; }
+    .form-alert[data-kind="error"] { background: #fff4f2; color: #a02e27; border-color: #f0c6be; }
+    .form-alert[data-kind="success"] { background: #ebf8ee; color: #166948; border-color: #c9e9d7; }
+    .form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .form-actions .btn { min-width: 150px; }
+    .form-actions .btn-primary { flex-grow: 1; }
+    .form-actions .btn-secondary { flex-shrink: 0; }
+    .ready-box { background: #f4faf6; padding: 16px; margin-top: 15px; border-radius: 13px; border: 1px solid #bdddc9; }
+    .ready-box h3 { margin: 0 0 8px; color: #0b624b; font-size: 15px; }
+    .ready-box p { font-size: 12px; margin: 0 0 10px; color: #476758; }
+    .ready-summary { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; row-gap: 6px; font-size: 12px; }
+    .ready-summary dt { color: #6a8175; }
+    .ready-summary dd { margin: 0; color: #24473a; font-weight: 750; overflow-wrap: anywhere; }
+    .demo-only { margin-top: 15px; background: #fff9eb; border: 1px solid #f1dfac; border-radius: 12px; padding: 12px 14px; font-size: 11px; color: #775b21; }
+    @media (max-width: 600px) {
+      .submission-header { padding: 19px 15px 13px; }
+      .submission-header h2 { font-size: 17px; }
+      .submission-icon { width: 36px; height: 36px; font-size: 20px; }
+      .submission-body { padding: 0 15px 18px; }
+      .form-grid, .photo-grid { grid-template-columns: 1fr; gap: 13px; }
+      .form-field.full { grid-column: auto; }
+      .photo-card p { min-height: 0; }
+      .form-actions .btn { width: 100%; }
+    }
+
+    /* Tahap 2D — panduan penilaian dan status pengiriman */
+    .criteria { margin: 0 24px 24px; padding: 19px; background: #fffdf6; border: 1px solid #e8e5d4; border-radius: 14px; }
+    .criteria-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .criteria-heading h3 { font-size: 17px; margin: 0; color: var(--deep); }
+    .criteria-total { white-space: nowrap; font-size: 11px; border-radius: 99px; padding: 7px 10px; background: #f3eacb; color: #6a5417; font-weight: 800; }
+    .criteria-lead { margin: 9px 0 13px; font-size: 12px; color: #586e61; }
+    .criteria-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+    .criteria-item { min-width: 0; display: flex; align-items: flex-start; gap: 10px; border: 1px solid #e7ebe0; background: #fff; border-radius: 11px; padding: 11px; }
+    .criteria-item strong { font-size: 12px; display: block; color: var(--deep); }
+    .criteria-item p { font-size: 11px; color: var(--secondary); margin: 3px 0 0; }
+    .criteria-score { display: grid; place-items: center; border-radius: 9px; height: 33px; min-width: 33px; font-size: 14px; font-weight: 850; color: var(--green); background: #e4f5eb; }
+    .criteria-footnote { margin: 10px 0 0; font-size: 11px; color: #66786d; }
+    .send-button { margin-top: 15px; width: 100%; font-size: 13px; }
+    /* Tombol nonaktif bukan berarti sedang memproses. */
+    .send-button:disabled, .btn:disabled, .btn-exit:disabled { opacity: .55; cursor: not-allowed; }
+    .btn[data-busy="true"], .btn-exit[data-busy="true"] { cursor: progress; }
+    .send-button[data-sent="true"]:disabled { cursor: default; opacity: 1; background: #e1f5ea; border-color: #9dd5b8; color: #0b6a4f; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .status-summary { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; margin: 13px 0; }
+    .status-count { background: #f0f8f4; border: 1px solid #dcece3; border-radius: 9px; padding: 9px 2px; text-align: center; min-width: 0; }
+    .status-count strong { display: block; font-size: 17px; line-height: 1.25; color: #076754; font-variant-numeric: tabular-nums; }
+    .status-count span { display: block; font-size: 10px; font-weight: 700; color: #61776d; }
+    .status-tools { display: flex; gap: 7px; align-items: center; margin-bottom: 9px; }
+    .status-tools select { flex: 1; width: 100%; min-width: 0; font-size: 12px; padding: 9px; border: 1px solid #cbded5; border-radius: 9px; color: #164c41; background: #fff; }
+    .status-tools .btn { min-height: 37px; font-size: 11px; white-space: nowrap; padding: 8px 10px; }
+    .status-note { font-size: 11px; line-height: 1.5; color: #617870; margin: 5px 0 10px; }
+    .status-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; max-height: 310px; overflow-y: auto; }
+    .status-list li { padding: 9px 10px; background: #fafdfb; border: 1px solid #e0ece5; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+    .status-student { font-size: 11px; font-weight: 750; color: #234b41; min-width: 0; overflow-wrap: anywhere; }
+    .status-class { font-size: 10px; font-weight: 850; background: #e3f4eb; color: #0b7156; border-radius: 7px; padding: 4px 6px; flex-shrink: 0; }
+    .status-empty { font-size: 12px; color: #6c8379; padding: 14px 0; text-align: center; }
+    .status-caption { font-size: 10px; color: #7a8b82; margin: 10px 0 0; }
+    .send-help { margin: 8px 0 0 !important; font-size: 11px; color: var(--secondary); }
+    @media (max-width: 600px) { .criteria { margin: 0 16px 16px; padding: 13px; } .criteria-grid { grid-template-columns: 1fr; } .criteria-heading h3 { font-size: 15px; } }
+  </style>
+  <!-- Jika pustaka 3D tidak bisa dimuat, jangan biarkan loading berputar tanpa akhir. -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      window.setTimeout(() => {
+        if (window.__accessGranted && !window.__kubusLab) {
+          const cover = document.getElementById('loadingCover');
+          if (cover && !cover.classList.contains('hidden')) {
+            cover.innerHTML = '<strong>Animasi 3D belum berhasil dimuat.</strong><span>Periksa koneksi internet, lalu muat ulang halaman. Gunakan browser Chrome, Edge, atau Firefox versi terbaru.</span>';
+          }
+        }
+      }, 16000);
+    });
+  </script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m16 3 12 7v13l-12 7L4 23V10zM4 10l12 7 12-7M16 17v13"/>
+          </svg>
+        </div>
+        <div><div class="brand-title">MTsN 3 BALANGAN</div><div class="brand-sub">Matematika Kelas IX</div></div>
+      </div>
+      <div class="header-end"><span class="top-tag" id="headerStatus">Akses Siswa</span><button type="button" class="btn-exit" id="btnExit" hidden>Keluar</button></div>
+    </div>
+  </header>
+  <!-- Tahap 2D: token diperiksa server GAS; tidak ada token rahasia di HTML. -->
+  <section class="login-wrap" id="loginScreen" aria-labelledby="loginTitle">
+    <div class="login-illustration">
+      <span class="login-eyebrow">◈ Ruang Belajar Matematika</span>
+      <h1>Kenali Kubus.<br>Temukan Jaring-Jaringnya.</h1>
+      <p class="login-lead">Lihat enam persegi berubah menjadi kubus melalui animasi 3D, lalu ciptakan jaring-jaring versimu sendiri dari kertas atau karton.</p>
+      <div class="preview-card">
+        <div class="net-preview" aria-hidden="true"><span class="net-square">1</span><span class="net-square">2</span><span class="net-square">3</span><span class="net-square">4</span><span class="net-square">5</span><span class="net-square">6</span></div>
+        <div class="preview-copy"><strong>Amati · Lipat · Buktikan</strong><span>Sebuah contoh pola T menjadi petunjuk awal untuk menemukan rancangan lainnya.</span></div>
+      </div>
+    </div>
+    <div class="card login-card">
+      <div class="login-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></div>
+      <h2 id="loginTitle">Masuk ke Laboratorium</h2>
+      <p>Masukkan token akses yang diberikan oleh guru untuk memulai kegiatan.</p>
+      <form class="login-form" id="loginForm">
+        <label for="accessToken">Token Akses</label>
+        <div class="token-field"><input type="password" id="accessToken" placeholder="Masukkan token dari guru" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" required><button class="token-toggle" type="button" id="toggleToken" aria-pressed="false">Tampilkan</button></div>
+        <p id="loginError" class="login-error" role="alert" hidden></p>
+        <button type="submit" id="btnEnter" class="btn btn-primary login-submit">Masuk &amp; Mulai Belajar →</button>
+      </form>
+      <div class="demo-note"><strong>🔒 Akses tugas siswa</strong><br>Gunakan token yang diberikan guru. Token diperiksa melalui Google Apps Script; jika token sudah diganti guru, mintalah token terbaru.</div>
+    </div>
+  </section>
+  <main id="appMain" hidden>
+    <section class="intro">
+      <p class="eyebrow">Eksplorasi Bangun Ruang</p>
+      <h1>Dari Jaring-Jaring<br>Menjadi Kubus</h1>
+      <p class="lead">Pernah membayangkan bagaimana enam persegi berubah menjadi sebuah kubus? Coba buka, lipat, dan putar model berikut. Perhatikan nomor pada setiap sisi!</p>
+    </section>
+    <div class="layout">
+      <section class="card" aria-label="Laboratorium jaring-jaring kubus 3D">
+        <div class="lab-header">
+          <div><h2 class="section-title">Eksperimen Kubus</h2><p class="section-small">Contoh 01 · Jaring-jaring berbentuk T</p></div>
+          <span id="stateChip" class="state-chip" role="status">Jaring-jaring terbuka</span>
+        </div>
+        <div class="stage" id="stage">
+          <div id="canvasHost" aria-label="Objek 3D jaring-jaring kubus yang dapat diputar dan dipilih sisinya"></div>
+          <div class="stage-label">6 persegi · 6 sisi</div>
+          <div class="stage-note">👆 Geser untuk memutar · Cubit atau gulir untuk memperbesar · Ketuk satu sisi untuk mengenali pasangannya</div>
+          <div class="loading-cover" id="loadingCover" role="status" aria-live="polite"><div class="spinner" aria-hidden="true"></div><span>Menyiapkan laboratorium 3D...</span></div>
+        </div>
+        <div class="controls">
+          <div class="controls-heading"><label for="foldRange">Posisi lipatan</label><output for="foldRange" id="foldPercent" class="percent">0% dilipat</output></div>
+          <div class="range-wrap"><span class="edge-label">Terbuka</span><input id="foldRange" type="range" min="0" max="100" value="0" step="1" aria-label="Geser posisi lipatan kubus"><span class="edge-label">Tertutup</span></div>
+          <div class="control-row">
+            <button class="btn grow" id="btnOpen" type="button">↗ Buka</button>
+            <button class="btn btn-primary grow" id="btnClose" type="button">⬡ Lipat</button>
+            <button class="btn btn-auto grow" id="btnAuto" type="button" aria-pressed="false">▶ Putar Animasi</button>
+            <button class="btn" id="btnReset" type="button" title="Kembalikan posisi pandangan dan lipatan" aria-label="Reset tampilan">⟲ Reset</button>
+            <label class="speed-label" for="speedSelect">Kecepatan</label>
+            <select class="speed" id="speedSelect" aria-label="Kecepatan animasi"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select>
+          </div>
+        </div>
+      </section>
+      <aside class="aside">
+        <section class="card aside-card">
+          <h2 class="aside-heading">Cara Menggunakan</h2>
+          <div class="steps">
+            <div class="step"><span class="step-index">1</span><div><strong>Amati pola</strong><p>Kenali enam persegi pada jaring-jaring berbentuk T, bernomor 1 sampai 6.</p></div></div>
+            <div class="step"><span class="step-index">2</span><div><strong>Coba lipat dan buka</strong><p>Tekan <b>Lipat</b> atau <b>Buka</b>. Geser pengatur untuk berhenti pada posisi tertentu.</p></div></div>
+            <div class="step"><span class="step-index">3</span><div><strong>Lihat dari arah berbeda</strong><p>Putar model dengan mouse atau sentuhan jari agar posisi sisi lebih jelas.</p></div></div>
+            <div class="step"><span class="step-index">4</span><div><strong>Temukan pasangan sisi</strong><p>Ketuk sebuah persegi. Perhatikan sisi mana yang berhadapan ketika menjadi kubus.</p></div></div>
+          </div>
+        </section>
+        <section class="card discover-card" aria-live="polite">
+          <h2 class="aside-heading">Ayo Menyelidiki!</h2>
+          <p>Menurutmu, sisi nomor berapakah yang akan saling berhadapan setelah jaring-jaring dilipat?</p>
+          <div class="discovery-result" id="discoveryResult"><strong>Sentuh salah satu sisi bernomor</strong><span>Pasangan sisi akan ditunjukkan di sini.</span></div>
+        </section>
+        <section class="card aside-card" id="statusPengumpulan" aria-labelledby="statusTitle">
+          <h2 class="aside-heading" id="statusTitle">✅ Sudah Mengumpulkan</h2>
+          <p class="status-note">Teman-teman yang sudah mengirim karya. Yuk, selesaikan punyamu juga!</p>
+          <div class="status-summary" aria-label="Jumlah siswa yang sudah mengumpulkan">
+            <div class="status-count"><strong id="jumlahTotal">—</strong><span>Total</span></div>
+            <div class="status-count"><strong id="jumlahA">—</strong><span>IX-A</span></div>
+            <div class="status-count"><strong id="jumlahB">—</strong><span>IX-B</span></div>
+            <div class="status-count"><strong id="jumlahC">—</strong><span>IX-C</span></div>
+          </div>
+          <div class="status-tools">
+            <label for="filterPengumpulan" class="sr-only">Filter daftar pengumpulan</label>
+            <select id="filterPengumpulan" aria-label="Pilih kelas untuk melihat pengumpulan">
+              <option value="all">Semua kelas</option>
+              <option value="IX-A">IX-A</option>
+              <option value="IX-B">IX-B</option>
+              <option value="IX-C">IX-C</option>
+            </select>
+            <button id="btnMuatPengumpulan" class="btn" type="button" title="Ambil daftar terbaru dari spreadsheet">↻ Perbarui</button>
+          </div>
+          <div id="infoPengumpulan" class="status-note" role="status" aria-live="polite">Memuat daftar pengumpulan…</div>
+          <ul class="status-list" id="daftarPengumpulan" aria-label="Nama siswa yang telah mengirim tugas"></ul>
+          <p class="status-caption">Daftar ini bukan peringkat atau nilai. Data diperbarui saat masuk, setelah mengirim, atau menekan Perbarui.</p>
+        </section>
+        <section class="card aside-card">
+          <h2 class="aside-heading">Tantangan Berikutnya</h2>
+          <p style="font-size:12px;color:var(--secondary);margin:0">Cobalah membayangkan bentuk jaring-jaring lain yang <strong>berbeda dari huruf T</strong>. Apakah semua susunan enam persegi bisa membentuk kubus?</p>
+          <div class="hint"><span class="bulb" aria-hidden="true">💡</span><span>Setelah memahami animasinya, ikuti <strong>Misi Kreator Kubus</strong> di bawah untuk membuat jaring-jaring sendiri.</span></div>
+        </section>
+      </aside>
+    </div>
+    <section class="card lesson" id="misi" aria-labelledby="lessonTitle">
+      <div class="lesson-head"><p class="eyebrow" style="margin-bottom:6px">Tugas Praktik Siswa</p><h2 id="lessonTitle">✂️ Misi Kreator Kubus</h2><p>Setelah belajar melalui kubus 3D, saatnya menguji ide sendiri dengan kertas atau karton.</p></div>
+      <div class="lesson-grid">
+        <div class="lesson-steps">
+          <div class="lesson-step"><span class="lesson-step-index">1</span><div><strong>Temukan pola berbeda</strong><p>Buat susunan enam persegi yang <b>berbeda dari contoh pola T</b> di laboratorium.</p></div></div>
+          <div class="lesson-step"><span class="lesson-step-index">2</span><div><strong>Gambar, ukur, dan beri nomor</strong><p>Gunakan enam persegi dengan panjang sisi sama. Ukur dengan penggaris, lalu beri nomor <b>1–6</b> pada setiap persegi.</p></div></div>
+          <div class="lesson-step"><span class="lesson-step-index">3</span><div><strong>Beri nama kreasimu</strong><p>Berilah nama yang unik, misalnya <b>Tangga Berliku</b> atau <b>Sayap Kupu-Kupu</b>. Nama ini adalah nama ciptaanmu, bukan istilah baku matematika.</p></div></div>
+          <div class="lesson-step"><span class="lesson-step-index">4</span><div><strong>Uji dengan melipat</strong><p>Potong pola dengan hati-hati, lipat mengikuti garis pertemuan persegi, dan periksa apakah keenam sisi membentuk kubus tanpa bertumpuk.</p></div></div>
+          <div class="lesson-step"><span class="lesson-step-index">5</span><div><strong>Siapkan bukti foto</strong><p>Ambil <b>foto jaring-jaring saat terbuka</b> (nomor terlihat) dan <b>foto hasilnya saat menjadi kubus</b>. Usahakan foto terang, jelas, dan tidak buram.</p></div></div>
+        </div>
+        <div class="lesson-goal">
+          <h3>✓ Periksa Karyamu</h3>
+          <ul>
+            <li>Ada tepat enam persegi.</li>
+            <li>Semua persegi sama besar.</li>
+            <li>Nomor 1–6 ditulis pada sisi.</li>
+            <li>Polanya berbeda dari contoh T.</li>
+            <li>Memiliki nama rancangan sendiri.</li>
+            <li>Dapat dilipat menjadi kubus.</li>
+            <li>Dua foto bukti sudah disiapkan.</li>
+          </ul>
+          <div class="lesson-pending"><strong>📷 Sudah punya dua foto?</strong><span>Isi <a href="#pengumpulan" style="color:var(--green);font-weight:800">Formulir Pengumpulan Karya</a> di bawah. Setelah fotomu siap, periksa formulir, lalu tekan <b>Kirim Tugas ke Guru</b> dan tunggu konfirmasi berhasil.</span></div>
+        </div>
+      </div>
+      <section class="criteria" aria-labelledby="criteriaTitle">
+        <div class="criteria-heading"><div><p class="eyebrow" style="margin-bottom:5px">Diketahui Sebelum Membuat Karya</p><h3 id="criteriaTitle">📋 Apa yang Dinilai Guru?</h3></div><span class="criteria-total">Total 100 poin</span></div>
+        <p class="criteria-lead">Yang terpenting adalah benar secara matematika. Tidak harus memakai karton mahal atau hiasan mewah; hasil sederhana yang tepat dan rapi tetap sangat baik.</p>
+        <div class="criteria-grid">
+          <div class="criteria-item"><span class="criteria-score">40</span><div><strong>Ketepatan jaring-jaring</strong><p>Enam persegi tersusun menjadi jaring-jaring yang benar dan bisa dilipat menjadi kubus tanpa sisi bertumpuk.</p></div></div>
+          <div class="criteria-item"><span class="criteria-score">20</span><div><strong>Ketelitian ukuran & nomor</strong><p>Ukuran keenam persegi sama, garis dan ukuran tepat, serta angka 1 sampai 6 jelas terbaca.</p></div></div>
+          <div class="criteria-item"><span class="criteria-score">15</span><div><strong>Kreativitas</strong><p>Memakai pola berbeda dari contoh huruf T dan memberikan nama yang menarik untuk karyanya.</p></div></div>
+          <div class="criteria-item"><span class="criteria-score">15</span><div><strong>Kerapian & kebersihan</strong><p>Potongan dan lipatan cukup rapi, kertas bersih, serta penomoran mudah dibaca.</p></div></div>
+          <div class="criteria-item"><span class="criteria-score">10</span><div><strong>Kelengkapan dokumentasi</strong><p>Dua foto terang dan jelas: jaring-jaring terbuka serta hasil setelah dilipat menjadi kubus.</p></div></div>
+        </div>
+        <p class="criteria-footnote">Poin di atas adalah panduan penilaian guru. Aplikasi tidak memberi nilai otomatis; guru memeriksa hasil karya dan bukti foto.</p>
+      </section>
+    </section>
+    <!-- Tahap 2D — formulir terhubung ke GAS, Google Sheets dan Google Drive. -->
+    <section class="card submission" id="pengumpulan" aria-labelledby="submissionTitle">
+      <div class="submission-header">
+        <div class="submission-icon" aria-hidden="true">📸</div>
+        <div><p class="eyebrow" style="margin-bottom:5px">Langkah Terakhir</p><h2 id="submissionTitle">Formulir Pengumpulan Karya</h2><p>Lengkapi identitas, nama rancangan, ukuran sisi, dan dua foto hasil karyamu. Pilih nama sesuai daftar kelas agar tidak ada perbedaan penulisan.</p></div>
+      </div>
+      <div class="submission-body">
+        <form id="formKarya" autocomplete="off">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label" for="kelasSiswa">Kelas <span class="required">*</span></label>
+              <select class="form-control" id="kelasSiswa" name="kelas" required>
+                <option value="">— Pilih Kelas —</option>
+                <option value="IX-A">IX-A</option>
+                <option value="IX-B">IX-B</option>
+                <option value="IX-C">IX-C</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="namaSiswa">Nama Siswa <span class="required">*</span></label>
+              <select class="form-control" id="namaSiswa" name="nama" required disabled><option value="">Pilih kelas terlebih dahulu</option></select>
+              <small class="form-help">Daftar nama mengikuti kelas yang dipilih.</small>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="namaKarya">Nama Jaring-Jaring Buatanmu <span class="required">*</span></label>
+              <input class="form-control" id="namaKarya" name="namaKarya" type="text" placeholder="Misalnya: Tangga Berliku" maxlength="70" required>
+              <small class="form-help">Berikan nama kreasi sendiri, bukan nama siswa.</small>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="panjangSisi">Panjang Sisi Setiap Persegi (cm) <span class="required">*</span></label>
+              <input class="form-control" id="panjangSisi" name="panjangSisi" type="number" inputmode="decimal" min="1" max="100" step="0.1" placeholder="Contoh: 5" required>
+              <small class="form-help">Keenam persegi harus berukuran sama.</small>
+            </div>
+          </div>
+          <div class="form-divider"></div>
+          <h3 class="upload-heading">Unggah Dua Foto Karya</h3>
+          <p class="upload-intro">Gunakan JPG, PNG, atau WebP. Pilih foto yang terang, tidak buram, dan memperlihatkan karya dengan jelas. Foto dikompresi otomatis di perangkatmu.</p>
+          <div class="photo-grid">
+            <div class="photo-card">
+              <h4>Foto 1 — Jaring-Jaring Terbuka <span class="required">*</span></h4>
+              <p>Seluruh pola dan nomor 1–6 harus terlihat jelas.</p>
+              <input type="file" id="fotoJaring" name="fotoJaring" accept="image/jpeg,image/png,image/webp" aria-describedby="fotoJaringMeta" required>
+              <div class="photo-visual" id="fotoJaringVisual"><div class="photo-placeholder"><span>▧</span>Belum ada foto jaring-jaring</div></div>
+              <div class="photo-meta" id="fotoJaringMeta" role="status" aria-live="polite">Belum memilih berkas</div>
+            </div>
+            <div class="photo-card">
+              <h4>Foto 2 — Kubus Setelah Dilipat <span class="required">*</span></h4>
+              <p>Foto kubus jadi, sehingga dapat diketahui pola berhasil dilipat.</p>
+              <input type="file" id="fotoKubus" name="fotoKubus" accept="image/jpeg,image/png,image/webp" aria-describedby="fotoKubusMeta" required>
+              <div class="photo-visual" id="fotoKubusVisual"><div class="photo-placeholder"><span>⬡</span>Belum ada foto kubus</div></div>
+              <div class="photo-meta" id="fotoKubusMeta" role="status" aria-live="polite">Belum memilih berkas</div>
+            </div>
+          </div>
+          <div id="formAlert" class="form-alert" role="status" aria-live="polite">Pastikan seluruh isian dan kedua foto sudah lengkap. Kamu bisa memeriksa kesiapan tugas sebelum mengirimkannya.</div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit" id="btnPeriksa">✓ Periksa Kesiapan Tugas</button>
+            <button class="btn btn-secondary" type="button" id="btnBersihkan">Bersihkan Formulir</button>
+          </div>
+          <section class="ready-box" id="readyBox" aria-labelledby="readyTitle" hidden>
+            <h3 id="readyTitle">✓ Karyamu sudah siap!</h3>
+            <p id="readyDescription">Periksa kembali ringkasan berikut. Jika semuanya sudah benar, tekan <strong>Kirim Tugas ke Guru</strong>. Kamu hanya bisa mengirim sekali untuk setiap nama siswa.</p>
+            <dl class="ready-summary">
+              <dt>Kelas</dt><dd id="ringkasKelas">—</dd>
+              <dt>Nama</dt><dd id="ringkasNama">—</dd>
+              <dt>Nama karya</dt><dd id="ringkasKarya">—</dd>
+              <dt>Panjang sisi</dt><dd id="ringkasSisi">—</dd>
+              <dt>Foto</dt><dd id="ringkasFoto">—</dd>
+            </dl>
+            <button type="button" class="btn btn-primary send-button" id="btnKirim">📤 Kirim Tugas ke Guru</button>
+            <p class="send-help" id="sendHelp">Jangan menutup atau meninggalkan halaman selama proses pengiriman dua foto.</p>
+          </section>
+          <div class="demo-only"><strong>Catatan untuk siswa:</strong> Setelah menekan Kirim, tunggu pesan berhasil. Jika koneksi terputus, hubungi guru untuk memastikan tugas sudah tercatat sebelum mencoba lagi.</div>
+        </form>
+      </div>
+    </section>
+    <p class="foot">Laboratorium Jaring-Jaring Kubus · MTsN 3 Balangan</p>
+  </main>
+  <script>
+    /* Tahap 2D — integrasi frontend statis dengan web app GAS.
+       Content-Type text/plain menjaga POST sebagai simple request lintas origin. */
+    const URL_GAS = 'https://script.google.com/macros/s/AKfycbyKjALLFC7JfeskR_BimLw2neJE0lqTcQ5nMRCFg18ZvR4cDf2EHzDm8Nq0iZFS1lWOew/exec';
+    let tokenSesi = '';
+    const loginScreen = document.getElementById('loginScreen');
+    const appMain = document.getElementById('appMain');
+    const accessToken = document.getElementById('accessToken');
+    const loginError = document.getElementById('loginError');
+    const btnExit = document.getElementById('btnExit');
+    const btnEnter = document.getElementById('btnEnter');
+
+    async function panggilGAS(payload, timeoutMs = 40000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(URL_GAS, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Server memberi respons HTTP ${response.status}.`);
+        let result;
+        try { result = await response.json(); }
+        catch (_) { throw new Error('Balasan server tidak dapat dibaca. Periksa pengaturan deployment GAS.'); }
+        if (!result || typeof result !== 'object') throw new Error('Balasan server tidak valid.');
+        return result;
+      } catch (error) {
+        if (error?.name === 'AbortError') throw new Error('Waktu tunggu habis. Jika baru saja mengirim tugas, periksa Google Sheets sebelum mencoba lagi.');
+        if (error instanceof TypeError) throw new Error('Koneksi ke Google Apps Script gagal. Periksa internet dan akses Web App (Anyone).');
+        throw error;
+      } finally { clearTimeout(timeout); }
+    }
+
+    function showLab() {
+      window.__accessGranted = true;
+      loginScreen.hidden = true;
+      appMain.hidden = false;
+      btnExit.hidden = false;
+      document.getElementById('headerStatus').textContent = 'Laboratorium 3D';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      requestAnimationFrame(() => window.__startCubeLab?.());
+      window.__muatPengumpulan?.();
+      window.setTimeout(() => {
+        if (!window.__kubusLab && window.__accessGranted) {
+          const cover = document.getElementById('loadingCover');
+          if (cover && !cover.classList.contains('hidden')) cover.innerHTML = '<strong>Animasi 3D belum berhasil dimuat.</strong><span>Periksa koneksi internet lalu muat ulang halaman.</span>';
+        }
+      }, 16000);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const typed = accessToken.value.trim();
+      if (!typed) return;
+      btnEnter.disabled = true;
+      btnEnter.textContent = '⏳ Memeriksa token…';
+      loginError.hidden = true;
+      try {
+        const result = await panggilGAS({ action: 'checkToken', token: typed }, 35000);
+        if (result.status !== 'success') throw new Error(result.message || 'Token tidak cocok.');
+        tokenSesi = typed;
+        accessToken.value = '';
+        showLab();
+      } catch (error) {
+        loginError.textContent = error.message || 'Tidak dapat memeriksa token. Coba kembali.';
+        loginError.hidden = false;
+        accessToken.focus();
+      } finally {
+        btnEnter.disabled = false;
+        btnEnter.textContent = 'Masuk & Mulai Belajar →';
+      }
+    });
+
+    document.getElementById('toggleToken').addEventListener('click', (event) => {
+      const button = event.currentTarget;
+      const isShowing = accessToken.type === 'text';
+      accessToken.type = isShowing ? 'password' : 'text';
+      button.textContent = isShowing ? 'Tampilkan' : 'Sembunyikan';
+      button.setAttribute('aria-pressed', String(!isShowing));
+    });
+
+    accessToken.addEventListener('input', () => { loginError.hidden = true; });
+    btnExit.addEventListener('click', () => {
+      tokenSesi = '';
+      window.__accessGranted = false;
+      window.__resetPengumpulan?.();
+      appMain.hidden = true;
+      loginScreen.hidden = false;
+      btnExit.hidden = true;
+      accessToken.value = '';
+      accessToken.type = 'password';
+      document.getElementById('toggleToken').textContent = 'Tampilkan';
+      document.getElementById('toggleToken').setAttribute('aria-pressed', 'false');
+      document.getElementById('headerStatus').textContent = 'Akses Siswa';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      accessToken.focus();
+    });
+  </script>
+  <script>
+    /* Tahap 2D. Daftar siswa tetap dari aplikasi sebelumnya; pengiriman memakai GAS. */
+    const DAFTAR_SISWA = {
+      "IX-A": [
+            "Abdul Rasyid",
+            "Ahmad Arrifa'i",
+            "Ahmad Kahfi",
+            "Ahmad Sairaji",
+            "Aisya Humaira Azka",
+            "Ananda Safitri",
+            "Aprizal Maulana",
+            "Dhea Rizky Munira",
+            "Fitria Zauharatun Nafizah",
+            "Hilyatul Aulia",
+            "Jamilah",
+            "Lailatul Asna",
+            "M. Nazrul Azmi",
+            "Mahmubah",
+            "Melisa Anatasya",
+            "Misyatun Nazwa",
+            "Muhammad Adib Putra",
+            "Muhammad Badali Akbar",
+            "Muhammad Fahmi",
+            "Muhammad Ibrahim",
+            "Muhammad Luthfi",
+            "Muhammad Rafa Alfarisi",
+            "Muhammad Rizki",
+            "Muhammad Taufik Ramadansyah",
+            "Muhammad Zainal Ilmi",
+            "Nabila Lathifah",
+            "Naya Zaqlina Zulfa",
+            "Noor Khaira",
+            "Norhidayah",
+            "Pikri Haikal",
+            "Putri Alifah",
+            "Rheina Marsha Marhamah",
+            "Saida Zahra",
+            "Siti Aisyah",
+            "Sri Maulida",
+            "Yudha Al-Faris"
+      ],
+      "IX-B": [
+            "Abdus Salam",
+            "Ahmad Dzakir",
+            "Ahmad Nazril Ikram",
+            "Akhmad Jaini Zaki",
+            "Anisa Husnaini",
+            "Aqilah Haira",
+            "Ayu",
+            "Diran Saputra",
+            "Hafizatunnisa",
+            "Husin Naparin",
+            "Iva Fina Nabila",
+            "Jumiati Ramadhani",
+            "M. Aliya",
+            "M. Raehan",
+            "Mardiah",
+            "Miftahul Jannah",
+            "Muhammad Abdallah",
+            "Muhammad Alfianor",
+            "Muhammad Dhiya Ulhaq",
+            "Muhammad Ilham",
+            "Muhammad Najib Amali",
+            "Muhammad Ridwan",
+            "Muhammad Umin",
+            "Muhammad Zaini Ramzi",
+            "Mutia Erlianti",
+            "Nada Dwi Annisa",
+            "Nazwa Amirah",
+            "Nor Maulida Amalia",
+            "Norol Inayah",
+            "Nur Hidayah",
+            "Rafa Hidayat",
+            "Risma Ayu Lestari",
+            "Shela Rizqia",
+            "Siti Elmawati",
+            "Syefa",
+            "Zahrattul Mielkya"
+      ],
+      "IX-C": [
+            "Achmad Zakaria",
+            "Ahmad Firdaus",
+            "Ahmad Riyadi",
+            "Ahmad Wandi",
+            "Akhmad Rafly Ra'uf",
+            "Annisa Harun",
+            "Aswita Indriya Nanda",
+            "Azkiatul Husna",
+            "Elisya Febriani",
+            "Hayatun Nadia",
+            "Husnatun Mahmudah",
+            "Jainal Hilmi",
+            "Karmila Syifa",
+            "M. Arifatullah",
+            "Mahdiah Ariani",
+            "Maulida",
+            "Miratul Hayah",
+            "Muhammad Abduh",
+            "Muhammad Al-Fiqri",
+            "Muhammad Firdaus Akbar",
+            "Muhammad Khafi",
+            "Muhammad Rifki Arrasyidi",
+            "Muhammad Syarwani",
+            "Muhammad Yahya",
+            "Muhammad Zairullah",
+            "Mutifa Wulansyah",
+            "Naila Fitriana",
+            "Nida Khairatina",
+            "Nor Maulidiya",
+            "Nova Indri Yanti",
+            "Pipi Indriani Ruhmana",
+            "Raysa Alvini",
+            "Rizky Amelia",
+            "Syifa Aulia Rahmah",
+            "Yafilia",
+            "Zulkarnain"
+      ]
+};
+    const $form = (id) => document.getElementById(id);
+    const formKarya = $form('formKarya');
+    const kelasSiswa = $form('kelasSiswa');
+    const namaSiswa = $form('namaSiswa');
+    const formAlert = $form('formAlert');
+    const readyBox = $form('readyBox');
+    const fotoConfig = {
+      jaring: { input: 'fotoJaring', visual: 'fotoJaringVisual', meta: 'fotoJaringMeta', placeholder: 'Belum ada foto jaring-jaring', icon: '▧' },
+      kubus: { input: 'fotoKubus', visual: 'fotoKubusVisual', meta: 'fotoKubusMeta', placeholder: 'Belum ada foto kubus', icon: '⬡' }
+    };
+    const hasilFoto = { jaring: null, kubus: null };
+    const versiFoto = { jaring: 0, kubus: 0 };
+    const MAKS_FOTO_ASLI = 12 * 1024 * 1024;
+    const MAKS_FOTO_KOMPRES = 950 * 1024;
+    const TIPE_DIDUKUNG = ['image/jpeg', 'image/png', 'image/webp'];
+
+    function setPemberitahuan(message, kind = 'info') {
+      formAlert.textContent = message;
+      formAlert.dataset.kind = kind;
+    }
+    let pengirimanBerhasil = false;
+    function batalkanHasilPemeriksaan() { readyBox.hidden = true; $form('btnKirim').disabled = pengirimanBerhasil; }
+
+    /* Tahap 2E: hanya kelas dan nama, dibaca lewat GAS setelah token valid. */
+    let daftarTerkumpul = [];
+    let versiPermintaan = 0;
+    let sedangMemuatPengumpulan = false;
+    let perluMemuatUlang = false;
+    const statusInfo = $form('infoPengumpulan');
+    const listPengumpulan = $form('daftarPengumpulan');
+    const btnPerbarui = $form('btnMuatPengumpulan');
+    const filterPengumpulan = $form('filterPengumpulan');
+
+    function tampilkanPengumpulan() {
+      const filter = filterPengumpulan.value;
+      const tampil = daftarTerkumpul.filter(item => filter === 'all' || item.kelas === filter);
+      listPengumpulan.replaceChildren();
+      if (!tampil.length) {
+        const li = document.createElement('li');
+        li.className = 'status-empty';
+        li.textContent = 'Belum ada pengumpulan untuk pilihan ini.';
+        listPengumpulan.append(li);
+      } else {
+        const frag = document.createDocumentFragment();
+        tampil.forEach(item => {
+          const li = document.createElement('li');
+          const name = document.createElement('span');
+          name.className = 'status-student';
+          name.textContent = item.nama;
+          const kelas = document.createElement('span');
+          kelas.className = 'status-class';
+          kelas.textContent = item.kelas;
+          li.append(name, kelas);
+          frag.append(li);
+        });
+        listPengumpulan.append(frag);
+      }
+      statusInfo.textContent = `${tampil.length} siswa ditampilkan${filter === 'all' ? '' : ' dari ' + filter}.`;
+    }
+
+    function setAngkaPengumpulan() {
+      $form('jumlahTotal').textContent = String(daftarTerkumpul.length);
+      ['IX-A','IX-B','IX-C'].forEach((kelas, i) => {
+        $form(['jumlahA','jumlahB','jumlahC'][i]).textContent = String(daftarTerkumpul.filter(s => s.kelas === kelas).length);
+      });
+    }
+
+    async function muatPengumpulan() {
+      if (!tokenSesi || !window.__accessGranted) return;
+      if (sedangMemuatPengumpulan) { perluMemuatUlang = true; return; }
+      const requestId = ++versiPermintaan;
+      const tokenSaatIni = tokenSesi;
+      sedangMemuatPengumpulan = true;
+      btnPerbarui.disabled = true;
+      btnPerbarui.dataset.busy = 'true';
+      statusInfo.textContent = 'Mengambil daftar terbaru…';
+      try {
+        const result = await panggilGAS({ action: 'getSubmitted', token: tokenSaatIni }, 35000);
+        if (requestId !== versiPermintaan || !window.__accessGranted || tokenSaatIni !== tokenSesi) return;
+        if (result.status !== 'success' || !Array.isArray(result.data)) throw new Error(result.message || 'Daftar tidak tersedia.');
+        const unik = new Set();
+        daftarTerkumpul = result.data.filter(item => {
+          if (!item || !DAFTAR_SISWA[item.kelas]?.includes(item.nama)) return false;
+          const key = item.kelas + '|' + item.nama;
+          if (unik.has(key)) return false;
+          unik.add(key);
+          return true;
+        });
+        setAngkaPengumpulan();
+        tampilkanPengumpulan();
+      } catch (error) {
+        if (requestId !== versiPermintaan || !window.__accessGranted) return;
+        statusInfo.textContent = 'Belum bisa memuat daftar. Tekan Perbarui untuk mencoba lagi.';
+        if (!daftarTerkumpul.length) listPengumpulan.replaceChildren();
+      } finally {
+        if (requestId === versiPermintaan) {
+          sedangMemuatPengumpulan = false;
+          btnPerbarui.disabled = false;
+          delete btnPerbarui.dataset.busy;
+          if (perluMemuatUlang && window.__accessGranted) {
+            perluMemuatUlang = false;
+            void muatPengumpulan();
+          }
+        }
+      }
+    }
+    function resetPengumpulan() {
+      ++versiPermintaan;
+      sedangMemuatPengumpulan = false;
+      perluMemuatUlang = false;
+      daftarTerkumpul = [];
+      listPengumpulan.replaceChildren();
+      filterPengumpulan.value = 'all';
+      ['jumlahTotal','jumlahA','jumlahB','jumlahC'].forEach(id => $form(id).textContent = '—');
+      statusInfo.textContent = 'Masuk dengan token untuk melihat daftar.';
+      btnPerbarui.disabled = false;
+      delete btnPerbarui.dataset.busy;
+    }
+    btnPerbarui.addEventListener('click', muatPengumpulan);
+    filterPengumpulan.addEventListener('change', tampilkanPengumpulan);
+    window.__muatPengumpulan = muatPengumpulan;
+    window.__resetPengumpulan = resetPengumpulan;
+    function resetOlahFoto(key) {
+      if (hasilFoto[key]?.previewUrl) URL.revokeObjectURL(hasilFoto[key].previewUrl);
+      hasilFoto[key] = null;
+      const c = fotoConfig[key];
+      const visual = $form(c.visual);
+      visual.replaceChildren();
+      const placeholder = document.createElement('div');
+      placeholder.className = 'photo-placeholder';
+      const icon = document.createElement('span');
+      icon.textContent = c.icon;
+      placeholder.append(icon, document.createTextNode(c.placeholder));
+      visual.append(placeholder);
+      const meta = $form(c.meta);
+      meta.textContent = 'Belum memilih berkas';
+      meta.dataset.kind = 'info';
+    }
+
+    kelasSiswa.addEventListener('change', () => {
+      const daftar = DAFTAR_SISWA[kelasSiswa.value] || [];
+      namaSiswa.replaceChildren();
+      const awal = document.createElement('option');
+      awal.value = '';
+      awal.textContent = daftar.length ? '— Pilih Nama Siswa —' : 'Pilih kelas terlebih dahulu';
+      namaSiswa.add(awal);
+      daftar.forEach((nama) => {
+        const option = document.createElement('option');
+        option.value = nama;
+        option.textContent = nama;
+        namaSiswa.add(option);
+      });
+      namaSiswa.disabled = !daftar.length;
+      batalkanHasilPemeriksaan();
+      setPemberitahuan(daftar.length ? `${daftar.length} nama siswa tersedia untuk ${kelasSiswa.value}. Pilih nama sesuai daftar.` : 'Pilih kelas untuk menampilkan daftar nama siswa.');
+    });
+
+    async function muatGambar(file) {
+      // createImageBitmap mengikuti orientasi foto pada browser modern.
+      if (typeof createImageBitmap === 'function') {
+        try {
+          const bitmap = await createImageBitmap(file);
+          return { image: bitmap, width: bitmap.width, height: bitmap.height, dispose: () => bitmap.close() };
+        } catch (_) { /* fallback Image berikut untuk perangkat lama */ }
+      }
+      const url = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Foto tidak bisa dibaca oleh browser.'));
+          img.src = url;
+        });
+        return { image: img, width: img.naturalWidth, height: img.naturalHeight, dispose: () => {} };
+      } finally { URL.revokeObjectURL(url); }
+    }
+
+    function jadikanJPEG(canvas, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Kompresi foto gagal.')), 'image/jpeg', quality);
+      });
+    }
+
+    async function kompresFoto(file) {
+      const loaded = await muatGambar(file);
+      try {
+        let skala = Math.min(1, 1280 / Math.max(loaded.width, loaded.height));
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        if (!ctx) throw new Error('Perangkat tidak dapat mengolah foto.');
+        for (let i = 0; i < 7; i++) {
+          canvas.width = Math.max(1, Math.round(loaded.width * skala));
+          canvas.height = Math.max(1, Math.round(loaded.height * skala));
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(loaded.image, 0, 0, canvas.width, canvas.height);
+          const kualitas = i < 3 ? [0.78, 0.64, 0.5][i] : 0.58;
+          const blob = await jadikanJPEG(canvas, kualitas);
+          if (blob.size <= MAKS_FOTO_KOMPRES) return blob;
+          skala *= 0.81;
+        }
+        throw new Error('Foto terlalu rumit untuk diperkecil. Coba foto lain.');
+      } finally { loaded.dispose(); }
+    }
+
+    function ukuranBerkas(bytes) { return `${Math.max(1, Math.round(bytes / 1024))} KB`; }
+
+    async function tanganiFoto(key) {
+      const config = fotoConfig[key];
+      const input = $form(config.input);
+      const file = input.files?.[0];
+      const job = ++versiFoto[key];
+      resetOlahFoto(key);
+      batalkanHasilPemeriksaan();
+      if (!file) return;
+      const meta = $form(config.meta);
+      if (!TIPE_DIDUKUNG.includes(file.type)) {
+        meta.textContent = 'Format belum didukung. Pilih foto JPG, PNG, atau WebP.';
+        meta.dataset.kind = 'error';
+        input.value = '';
+        return;
+      }
+      if (file.size > MAKS_FOTO_ASLI) {
+        meta.textContent = 'Ukuran berkas asli maksimal 12 MB. Pilih foto yang lebih kecil.';
+        meta.dataset.kind = 'error';
+        input.value = '';
+        return;
+      }
+      meta.textContent = 'Mengolah dan mengompresi foto…';
+      meta.dataset.kind = 'info';
+      try {
+        const blob = await kompresFoto(file);
+        if (job !== versiFoto[key]) return;
+        const previewUrl = URL.createObjectURL(blob);
+        hasilFoto[key] = { blob, previewUrl, originalName: file.name };
+        const image = document.createElement('img');
+        image.alt = key === 'jaring' ? 'Pratinjau jaring-jaring terbuka' : 'Pratinjau kubus terlipat';
+        image.src = previewUrl;
+        $form(config.visual).replaceChildren(image);
+        meta.textContent = `✓ Foto siap · ${ukuranBerkas(blob.size)} (dari ${ukuranBerkas(file.size)})`;
+        meta.dataset.kind = 'success';
+      } catch (error) {
+        if (job !== versiFoto[key]) return;
+        meta.textContent = error?.message || 'Foto gagal diproses. Coba berkas lain.';
+        meta.dataset.kind = 'error';
+        input.value = '';
+      }
+    }
+
+    Object.keys(fotoConfig).forEach((key) => {
+      $form(fotoConfig[key].input).addEventListener('change', () => tanganiFoto(key));
+    });
+    ['namaSiswa','namaKarya','panjangSisi'].forEach((id) => {
+      $form(id).addEventListener(id === 'namaSiswa' ? 'change' : 'input', batalkanHasilPemeriksaan);
+    });
+
+    formKarya.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const kelas = kelasSiswa.value;
+      const nama = namaSiswa.value;
+      const namaKarya = $form('namaKarya').value.trim();
+      const panjang = Number($form('panjangSisi').value);
+      if (!DAFTAR_SISWA[kelas]?.includes(nama)) {
+        setPemberitahuan('Pilih kelas dan nama siswa yang sesuai dari dropdown.', 'error');
+        return;
+      }
+      if (!namaKarya || namaKarya.length > 70 || !Number.isFinite(panjang) || panjang < 1 || panjang > 100) {
+        setPemberitahuan('Periksa kembali nama rancangan dan panjang sisi.', 'error');
+        return;
+      }
+      if (Object.keys(fotoConfig).some((key) => !hasilFoto[key])) {
+        setPemberitahuan('Kedua foto harus selesai diproses terlebih dahulu.', 'error');
+        return;
+      }
+      $form('ringkasKelas').textContent = kelas;
+      $form('ringkasNama').textContent = nama;
+      $form('ringkasKarya').textContent = namaKarya;
+      $form('ringkasSisi').textContent = `${panjang.toLocaleString('id-ID')} cm`;
+      $form('ringkasFoto').textContent = `Jaring-jaring ${ukuranBerkas(hasilFoto.jaring.blob.size)} · Kubus ${ukuranBerkas(hasilFoto.kubus.blob.size)}`;
+      setPemberitahuan('Pemeriksaan berhasil. Periksa ringkasan, lalu tekan Kirim Tugas ke Guru.', 'success');
+      readyBox.hidden = false;
+      $form('btnKirim').disabled = pengirimanBerhasil;
+      readyBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // Kirim hanya setelah ringkasan diperiksa. Semua data diformat sesuai kontrak Code.gs.
+    async function dataURLdariBlob(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Gagal membaca foto yang telah dikompresi.'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    $form('btnKirim').addEventListener('click', async () => {
+      if (readyBox.hidden || pengirimanBerhasil) return;
+      if (!tokenSesi || !window.__accessGranted) {
+        setPemberitahuan('Sesi token sudah berakhir. Silakan keluar lalu masuk kembali.', 'error');
+        return;
+      }
+      const kelas = kelasSiswa.value;
+      const nama = namaSiswa.value;
+      const namaKarya = $form('namaKarya').value.trim();
+      const panjangSisi = Number($form('panjangSisi').value);
+      if (!DAFTAR_SISWA[kelas]?.includes(nama) || !namaKarya || !Number.isFinite(panjangSisi) ||
+          panjangSisi < 1 || panjangSisi > 100 || !hasilFoto.jaring || !hasilFoto.kubus) {
+        batalkanHasilPemeriksaan();
+        setPemberitahuan('Isian berubah atau foto belum siap. Periksa kembali tugasmu.', 'error');
+        return;
+      }
+      // Catat kontrol yang semula aktif agar status awal pulih setelah respons.
+      const aktif = Array.from(formKarya.querySelectorAll('button,input,select')).filter(el => !el.disabled);
+      aktif.forEach(el => el.disabled = true);
+      btnExit.disabled = true;
+      const btn = $form('btnKirim');
+      const teksTombol = btn.textContent;
+      btn.dataset.busy = 'true';
+      btn.textContent = '⏳ Mengirim kedua foto…';
+      $form('sendHelp').textContent = 'Sedang mengunggah ke Google Drive dan mencatat ke Google Sheets. Jangan tutup halaman.';
+      setPemberitahuan('Mengirim tugas… Mohon tunggu hingga ada konfirmasi dari server.');
+      try {
+        const [fotoJaring, fotoKubus] = await Promise.all([
+          dataURLdariBlob(hasilFoto.jaring.blob),
+          dataURLdariBlob(hasilFoto.kubus.blob)
+        ]);
+        const result = await panggilGAS({
+          action: 'submitTugas', token: tokenSesi,
+          kelas, nama, namaKarya, panjangSisi, fotoJaring, fotoKubus
+        }, 100000);
+        if (result.status !== 'success') {
+          if (result.code === 'DUPLICATE') throw new Error('Tugas atas nama ini sudah tercatat. Hubungi guru apabila perlu memperbaiki.');
+          if (result.code === 'INVALID_TOKEN') throw new Error('Token sudah tidak berlaku. Keluar dan masuk lagi menggunakan token terbaru dari guru.');
+          throw new Error(result.message || 'Gagal menyimpan tugas.');
+        }
+        pengirimanBerhasil = true;
+        setPemberitahuan(`✓ Berhasil! Tugas ${nama} (${kelas}) sudah tercatat dan kedua foto tersimpan.`, 'success');
+        $form('readyTitle').textContent = '🎉 Tugas berhasil dikirim!';
+        $form('readyDescription').textContent = 'Pengiriman berhasil dikonfirmasi oleh server. Berikut adalah rincian tugas yang sudah disimpan.';
+        $form('sendHelp').textContent = 'Tugasmu sudah tercatat. Tidak perlu mengirim ulang. Jika ada kesalahan, hubungi guru.';
+        // Daftar pengumpulan diperbarui dari server setelah proses penyimpanan sukses.
+        void muatPengumpulan();
+        // Notifikasi bersifat tambahan: jika popup bermasalah, jangan pernah
+        // menganggap penyimpanan server yang sudah sukses sebagai kegagalan.
+        try {
+          if (window.Swal?.fire) {
+            await window.Swal.fire({
+              icon: 'success',
+              title: 'Berhasil terkirim!',
+              text: `Terima kasih, ${nama} (${kelas})! Tugas dan kedua fotomu sudah diterima guru.`,
+              confirmButtonText: 'Selesai',
+              confirmButtonColor: '#08725f',
+              allowOutsideClick: false
+            });
+          } else {
+            // Jika CDN SweetAlert2 diblokir, tetap ada pesan sukses di halaman.
+            window.alert(`Berhasil terkirim! Tugas ${nama} (${kelas}) telah tercatat.`);
+          }
+        } catch (popupError) {
+          console.warn('Popup sukses gagal ditampilkan; tugas tetap tercatat.', popupError);
+        }
+      } catch (error) {
+        setPemberitahuan(error?.message || 'Pengiriman gagal. Periksa koneksi dan coba kembali.', 'error');
+        $form('sendHelp').textContent = 'Bila koneksi terputus saat pengiriman, mintalah guru mengecek spreadsheet sebelum mengulanginya.';
+      } finally {
+        aktif.forEach(el => el.disabled = false);
+        btnExit.disabled = false;
+        delete btn.dataset.busy;
+        btn.textContent = pengirimanBerhasil ? '✓ Tugas Sudah Terkirim' : teksTombol;
+        btn.dataset.sent = pengirimanBerhasil ? 'true' : 'false';
+        if (pengirimanBerhasil) btn.disabled = true;
+      }
+    });
+
+    $form('btnBersihkan').addEventListener('click', () => {
+      pengirimanBerhasil = false;
+      $form('readyTitle').textContent = '✓ Karyamu sudah siap!';
+      $form('readyDescription').innerHTML = 'Periksa kembali ringkasan berikut. Jika semuanya sudah benar, tekan <strong>Kirim Tugas ke Guru</strong>. Kamu hanya bisa mengirim sekali untuk setiap nama siswa.';
+      $form('btnKirim').textContent = '📤 Kirim Tugas ke Guru';
+      delete $form('btnKirim').dataset.sent;
+      $form('sendHelp').textContent = 'Jangan menutup atau meninggalkan halaman selama proses pengiriman dua foto.';
+      formKarya.reset();
+      Object.keys(fotoConfig).forEach((key) => {
+        ++versiFoto[key];
+        resetOlahFoto(key);
+      });
+      namaSiswa.replaceChildren(new Option('Pilih kelas terlebih dahulu', ''));
+      namaSiswa.disabled = true;
+      batalkanHasilPemeriksaan();
+      setPemberitahuan('Formulir dikosongkan. Silakan mulai dari memilih kelas.');
+      kelasSiswa.focus();
+    });
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    function startCubeLab() {
+    // Hanya jalankan sekali; keluar/masuk kembali tidak menggandakan renderer.
+    if (window.__cubeStarted) return;
+    window.__cubeStarted = true;
+    const $ = (id) => document.getElementById(id);
+    const stage = $('canvasHost');
+    const cover = $('loadingCover');
+    const foldRange = $('foldRange');
+    const foldPercent = $('foldPercent');
+    const stateChip = $('stateChip');
+    const btnAuto = $('btnAuto');
+    const output = $('discoveryResult');
+
+    try {
+      if (!window.WebGLRenderingContext) throw new Error('Browser belum mendukung WebGL.');
+
+      const SIDE = 1.7;
+      const HALF = SIDE / 2;
+      const COLORS = ['#b9ece0','#c1ddfa','#f7d6b1','#f7c7ce','#d9d0fa','#f6ebb4'];
+      const opposites = { 1: 5, 2: 3, 3: 2, 4: 6, 5: 1, 6: 4 };
+      const labels = { 1: 'Atas (palang T)', 2: 'Kiri (palang T)', 3: 'Kanan (palang T)', 4: 'Batang pertama', 5: 'Batang kedua', 6: 'Ujung batang T' };
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0xffffff, 0);
+      stage.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enablePan = false;
+      controls.minDistance = 6;
+      controls.maxDistance = 27;
+      controls.target.set(0, -1.5 * SIDE, 0);
+      camera.position.copy(controls.target).add(new THREE.Vector3(3.8, 4.2, 12.3));
+      controls.update();
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xd7e9de, 2.2));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+      keyLight.position.set(-2, 5, 9);
+      scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xdff6f2, 0.8);
+      fillLight.position.set(7, -5, -8);
+      scene.add(fillLight);
+
+      const root = new THREE.Group();
+      scene.add(root);
+      const allFaces = {};
+      const hinges = [];
+      const clickable = [];
+      let selectedFace = null;
+
+      function drawFaceTexture(number, tint) {
+        const c = document.createElement('canvas');
+        c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = tint;
+        ctx.fillRect(0, 0, 512, 512);
+        ctx.strokeStyle = '#ffffffc9';
+        ctx.lineWidth = 8;
+        ctx.strokeRect(14, 14, 484, 484);
+        ctx.strokeStyle = '#29584b24';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(33, 33, 446, 446);
+        ctx.fillStyle = '#184841';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '800 186px system-ui, Arial, sans-serif';
+        ctx.fillText(String(number), 256, 253);
+        ctx.font = '700 33px system-ui, Arial, sans-serif';
+        ctx.fillStyle = '#37675e';
+        ctx.fillText('SISI', 256, 365);
+        const texture = new THREE.CanvasTexture(c);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+        return texture;
+      }
+
+      function makeFace(number) {
+        const group = new THREE.Group();
+        group.name = `Sisi ${number}`;
+        const texture = drawFaceTexture(number, COLORS[number - 1]);
+        const paper = new THREE.Mesh(
+          new THREE.BoxGeometry(SIDE - 0.016, SIDE - 0.016, 0.044),
+          new THREE.MeshStandardMaterial({ color: COLORS[number - 1], roughness: .89, metalness: 0 })
+        );
+        group.add(paper);
+        const labelGeometry = new THREE.PlaneGeometry(SIDE - 0.058, SIDE - 0.058);
+        const labelMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+        const front = new THREE.Mesh(labelGeometry, labelMaterial);
+        front.position.z = 0.0235;
+        const back = new THREE.Mesh(labelGeometry, labelMaterial);
+        back.rotation.y = Math.PI;
+        back.position.z = -0.0235;
+        group.add(front, back);
+        for (const mesh of [front, back, paper]) {
+          mesh.userData.faceNumber = number;
+          clickable.push(mesh);
+        }
+        const outline = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.BoxGeometry(SIDE - 0.012, SIDE - 0.012, 0.045)),
+          new THREE.LineBasicMaterial({ color: '#5b8278', transparent: true, opacity: 0.62 })
+        );
+        group.add(outline);
+        allFaces[number] = { group, outline };
+        return group;
+      }
+
+      // Pola T: 2–1–3 di bagian atas, lalu 4–5–6 ke bawah.
+      // Setiap sisi adalah anak dari engselnya. Jadi, ketika engsel berputar,
+      // sisi dan semua sisi yang menempel setelahnya ikut terlipat secara fisik.
+      const face1 = makeFace(1);
+      root.add(face1);
+      function attachFace(parentGroup, direction, number) {
+        const hinge = new THREE.Group();
+        const child = makeFace(number);
+        let x = 0, y = 0, axis = '', sign = 0;
+        if (direction === 'left') { x = -HALF; axis = 'y'; sign = 1; }
+        if (direction === 'right') { x = HALF; axis = 'y'; sign = -1; }
+        if (direction === 'up') { y = HALF; axis = 'x'; sign = 1; }
+        if (direction === 'down') { y = -HALF; axis = 'x'; sign = -1; }
+        hinge.position.set(x, y, 0);
+        child.position.set(x, y, 0);
+        hinge.add(child);
+        parentGroup.add(hinge);
+        hinges.push({ hinge, axis, sign });
+        return child;
+      }
+      attachFace(face1, 'left', 2);
+      attachFace(face1, 'right', 3);
+      const face4 = attachFace(face1, 'down', 4);
+      const face5 = attachFace(face4, 'down', 5);
+      attachFace(face5, 'down', 6);
+
+      const raycaster = new THREE.Raycaster();
+      const point = new THREE.Vector2();
+      let pointerStart = null;
+      renderer.domElement.addEventListener('pointerdown', (e) => {
+        pointerStart = { x: e.clientX, y: e.clientY, time: performance.now() };
+      });
+      renderer.domElement.addEventListener('pointerup', (e) => {
+        if (!pointerStart) return;
+        const distance = Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y);
+        pointerStart = null;
+        if (distance > 8) return;
+        const rect = renderer.domElement.getBoundingClientRect();
+        point.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        point.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(point, camera);
+        const hits = raycaster.intersectObjects(clickable, false);
+        if (hits.length) selectFace(hits[0].object.userData.faceNumber);
+      });
+      renderer.domElement.addEventListener('pointercancel', () => { pointerStart = null; });
+
+      function selectFace(n) {
+        selectedFace = n;
+        const opposite = opposites[n];
+        for (const [faceNo, item] of Object.entries(allFaces)) {
+          const num = Number(faceNo);
+          const isSelected = num === n;
+          const isOpposite = num === opposite;
+          item.outline.material.color.set(isSelected ? '#06795c' : isOpposite ? '#d67923' : '#5b8278');
+          item.outline.material.opacity = isSelected || isOpposite ? 1 : .58;
+        }
+        output.innerHTML = `<strong>Sisi ${n} berhadapan dengan sisi ${opposite}</strong><span>Ketika kubus ditutup, sisi ${n} dan ${opposite} berada pada dua bidang yang saling berhadapan. Coba putar kubus untuk memeriksanya!</span>`;
+      }
+
+      let progress = 0; // 0 = jaring-jaring datar, 1 = kubus tertutup
+      let motion = null;
+      let autoPlay = false;
+      let nextCycle = 0;
+      let speed = 1;
+      let lastFrame = performance.now();
+      const targetCenter = new THREE.Vector3();
+      const deltaTarget = new THREE.Vector3();
+
+      function applyFold(amount) {
+        progress = THREE.MathUtils.clamp(amount, 0, 1);
+        const angle = progress * Math.PI / 2;
+        for (const { hinge, axis, sign } of hinges) hinge.rotation[axis] = sign * angle;
+        targetCenter.set(0, -1.5 * SIDE * (1 - progress), HALF * progress);
+        deltaTarget.copy(targetCenter).sub(controls.target);
+        controls.target.copy(targetCenter);
+        camera.position.add(deltaTarget);
+        foldRange.value = Math.round(progress * 100);
+        foldPercent.textContent = `${Math.round(progress * 100)}% dilipat`;
+        stateChip.textContent = progress < 0.02 ? 'Jaring-jaring terbuka' : progress > .98 ? 'Kubus tertutup' : 'Sedang dilipat';
+      }
+
+      function cancelAuto() {
+        autoPlay = false;
+        nextCycle = 0;
+        btnAuto.classList.remove('is-active');
+        btnAuto.setAttribute('aria-pressed', 'false');
+        btnAuto.textContent = '▶ Putar Animasi';
+      }
+
+      function animateTo(to) {
+        if (Math.abs(to - progress) < .002) { motion = null; applyFold(to); return; }
+        motion = {
+          start: performance.now(), from: progress, to,
+          duration: Math.max(220, Math.abs(to - progress) * 2200 / speed)
+        };
+      }
+      $('btnOpen').addEventListener('click', () => { cancelAuto(); animateTo(0); });
+      $('btnClose').addEventListener('click', () => { cancelAuto(); animateTo(1); });
+      foldRange.addEventListener('input', (e) => { cancelAuto(); motion = null; applyFold(Number(e.target.value) / 100); });
+      $('speedSelect').addEventListener('change', (e) => { speed = Number(e.target.value) || 1; });
+      btnAuto.addEventListener('click', () => {
+        if (autoPlay) { cancelAuto(); motion = null; return; }
+        autoPlay = true;
+        btnAuto.classList.add('is-active');
+        btnAuto.setAttribute('aria-pressed', 'true');
+        btnAuto.textContent = 'Ⅱ Jeda Animasi';
+        animateTo(progress >= .99 ? 0 : 1);
+        if (!motion) nextCycle = performance.now() + 550;
+      });
+      $('btnReset').addEventListener('click', () => {
+        cancelAuto(); motion = null;
+        applyFold(0);
+        controls.target.set(0, -1.5 * SIDE, 0);
+        camera.position.copy(controls.target).add(new THREE.Vector3(3.8, 4.2, 12.3));
+        controls.update();
+        selectedFace = null;
+        Object.values(allFaces).forEach((item) => {
+          item.outline.material.color.set('#5b8278'); item.outline.material.opacity = .62;
+        });
+        output.innerHTML = '<strong>Sentuh salah satu sisi bernomor</strong><span>Pasangan sisi akan ditunjukkan di sini.</span>';
+      });
+
+      function resize() {
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        if (!width || !height) return;
+        camera.aspect = width / height;
+        // Untuk layar sempit, mundurkan kamera supaya pola T tetap utuh.
+        camera.fov = camera.aspect < .82 ? 49 : 43;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+      const resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(stage);
+      window.addEventListener('resize', resize);
+      applyFold(0);
+      resize();
+      cover.classList.add('hidden');
+
+      function loop(now) {
+        requestAnimationFrame(loop);
+        if (appMain.hidden) { lastFrame = now; return; }
+        const dt = Math.min((now - lastFrame) / 1000, .05);
+        lastFrame = now;
+        if (motion) {
+          const elapsed = THREE.MathUtils.clamp((now - motion.start) / motion.duration, 0, 1);
+          const eased = elapsed * elapsed * (3 - 2 * elapsed);
+          applyFold(THREE.MathUtils.lerp(motion.from, motion.to, eased));
+          if (elapsed >= 1) {
+            motion = null;
+            if (autoPlay) nextCycle = now + 700;
+          }
+        } else if (autoPlay && nextCycle && now >= nextCycle) {
+          nextCycle = 0;
+          animateTo(progress > .5 ? 0 : 1);
+        }
+        controls.update(dt);
+        renderer.render(scene, camera);
+      }
+      requestAnimationFrame(loop);
+      // Memudahkan pemeriksaan fungsi saat pengujian, tidak dipakai untuk backend.
+      window.__kubusLab = { getProgress: () => progress, getFaceCount: () => Object.keys(allFaces).length, getOpposites: () => ({ ...opposites }) };
+    } catch (error) {
+      console.error('Laboratorium 3D gagal dijalankan:', error);
+      cover.innerHTML = '<strong>Visualisasi 3D tidak dapat dijalankan.</strong><span>Pastikan perangkat terhubung ke internet dan coba buka dengan Chrome, Edge, atau Firefox versi terbaru.</span>';
+    }
+    }
+    window.__startCubeLab = startCubeLab;
+    if (window.__accessGranted) startCubeLab();
+  </script>
+</body>
+</html>
