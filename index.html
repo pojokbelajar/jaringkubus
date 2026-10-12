@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#076b5c">
-  <meta name="description" content="Laboratorium interaktif untuk mempelajari jaring-jaring kubus dengan animasi 3D membuka, melipat, dan memutar.">
+  <meta name="description" content="Media pembelajaran jaring-jaring kubus dengan dua gambar contoh: terbuka dan hampir tertutup.">
   <title>Laboratorium Jaring-Jaring Kubus | MTsN 3 Balangan</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23076b5c'/%3E%3Cpath d='m32 9 22 12v23L32 56 10 44V21z' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='m10 21 22 13 22-13M32 34v22' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3C/svg%3E">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -51,6 +51,20 @@
     #canvasHost canvas:active { cursor: grabbing; }
     .stage-note { z-index: 2; position: absolute; bottom: 13px; left: 13px; right: 13px; padding: 9px 12px; color: #47645e; background: #ffffffea; border: 1px solid #e5ede9; border-radius: 10px; font-size: 11px; text-align: center; pointer-events: none; }
     .stage-label { position: absolute; z-index: 2; top: 13px; left: 13px; font-size: 11px; font-weight: 800; border-radius: 8px; padding: 7px 10px; background: #ffffffee; color: var(--deep); border: 1px solid #e5efeb; pointer-events: none; }
+    .visual-stage { padding: 0 15px 20px; }
+    .visual-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .visual-card { margin: 0; border: 1px solid #e2ede8; border-radius: 16px; background: #fcfffd; padding: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
+    .visual-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 82px; margin-bottom: 10px; padding: 6px 10px; border-radius: 999px; background: #edf8f3; color: var(--green); font-size: 11px; font-weight: 850; border: 1px solid #d8ece3; }
+    .visual-figure { border-radius: 14px; overflow: hidden; border: 1px solid #e4efea; background: radial-gradient(circle at 30% 20%, #ffffff, #f3f8f6 70%); }
+    /* Gambar contoh disimpan bersama index.html di root GitHub Pages. */
+    .visual-figure { aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 10px; }
+    .visual-figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .visual-card figcaption { padding-top: 11px; }
+    @media (max-width: 750px) { .visual-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .visual-figure { aspect-ratio: 1 / 1; } }
+    .visual-card figcaption strong { display: block; color: var(--deep); font-size: 14px; margin-bottom: 3px; }
+    .visual-card figcaption span { display: block; color: var(--secondary); font-size: 12px; }
+    .visual-note { margin-top: 14px; padding: 13px 14px; border-radius: 12px; border: 1px dashed #c6ddd3; background: #f6fbf8; color: #45655d; font-size: 12px; }
     .loading-cover { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; position: absolute; inset: 0; z-index: 4; background: #f4faf7; color: var(--green); font-size: 13px; text-align: center; padding: 20px; }
     .loading-cover.hidden { display: none; }
     .spinner { width: 29px; height: 29px; border: 3px solid #d8eee4; border-top-color: var(--green); border-radius: 50%; animation: spin .9s linear infinite; }
@@ -259,27 +273,6 @@
     .send-help { margin: 8px 0 0 !important; font-size: 11px; color: var(--secondary); }
     @media (max-width: 600px) { .criteria { margin: 0 16px 16px; padding: 13px; } .criteria-grid { grid-template-columns: 1fr; } .criteria-heading h3 { font-size: 15px; } }
   </style>
-  <!-- Jika pustaka 3D tidak bisa dimuat, jangan biarkan loading berputar tanpa akhir. -->
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      window.setTimeout(() => {
-        if (window.__accessGranted && !window.__kubusLab) {
-          const cover = document.getElementById('loadingCover');
-          if (cover && !cover.classList.contains('hidden')) {
-            cover.innerHTML = '<strong>Animasi 3D belum berhasil dimuat.</strong><span>Periksa koneksi internet, lalu muat ulang halaman. Gunakan browser Chrome, Edge, atau Firefox versi terbaru.</span>';
-          }
-        }
-      }, 16000);
-    });
-  </script>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
-      }
-    }
-  </script>
 </head>
 <body>
   <header class="topbar">
@@ -300,7 +293,7 @@
     <div class="login-illustration">
       <span class="login-eyebrow">◈ Ruang Belajar Matematika</span>
       <h1>Kenali Kubus.<br>Temukan Jaring-Jaringnya.</h1>
-      <p class="login-lead">Lihat enam persegi berubah menjadi kubus melalui animasi 3D, lalu ciptakan jaring-jaring versimu sendiri dari kertas atau karton.</p>
+      <p class="login-lead">Amati dua gambar contoh jaring-jaring kubus, lalu ciptakan jaring-jaring versimu sendiri dari kertas atau karton.</p>
       <div class="preview-card">
         <div class="net-preview" aria-hidden="true"><span class="net-square">1</span><span class="net-square">2</span><span class="net-square">3</span><span class="net-square">4</span><span class="net-square">5</span><span class="net-square">6</span></div>
         <div class="preview-copy"><strong>Amati · Lipat · Buktikan</strong><span>Sebuah contoh pola T menjadi petunjuk awal untuk menemukan rancangan lainnya.</span></div>
@@ -323,47 +316,48 @@
     <section class="intro">
       <p class="eyebrow">Eksplorasi Bangun Ruang</p>
       <h1>Dari Jaring-Jaring<br>Menjadi Kubus</h1>
-      <p class="lead">Pernah membayangkan bagaimana enam persegi berubah menjadi sebuah kubus? Coba buka, lipat, dan putar model berikut. Perhatikan nomor pada setiap sisi!</p>
+      <p class="lead">Perhatikan dua gambar contoh berikut. Gambar pertama menunjukkan jaring-jaring berbentuk T yang masih terbuka, sedangkan gambar kedua memperlihatkan kubus setelah dilipat. Perhatikan nomor pada setiap sisi!</p>
     </section>
     <div class="layout">
-      <section class="card" aria-label="Laboratorium jaring-jaring kubus 3D">
+      <section class="card" aria-label="Contoh visual jaring-jaring kubus">
         <div class="lab-header">
           <div><h2 class="section-title">Eksperimen Kubus</h2><p class="section-small">Contoh 01 · Jaring-jaring berbentuk T</p></div>
-          <span id="stateChip" class="state-chip" role="status">Jaring-jaring terbuka</span>
+          <span id="stateChip" class="state-chip" role="status">2 gambar contoh</span>
         </div>
-        <div class="stage" id="stage">
-          <div id="canvasHost" aria-label="Objek 3D jaring-jaring kubus yang dapat diputar dan dipilih sisinya"></div>
-          <div class="stage-label">6 persegi · 6 sisi</div>
-          <div class="stage-note">👆 Geser untuk memutar · Cubit atau gulir untuk memperbesar · Ketuk satu sisi untuk mengenali pasangannya</div>
-          <div class="loading-cover" id="loadingCover" role="status" aria-live="polite"><div class="spinner" aria-hidden="true"></div><span>Menyiapkan laboratorium 3D...</span></div>
-        </div>
-        <div class="controls">
-          <div class="controls-heading"><label for="foldRange">Posisi lipatan</label><output for="foldRange" id="foldPercent" class="percent">0% dilipat</output></div>
-          <div class="range-wrap"><span class="edge-label">Terbuka</span><input id="foldRange" type="range" min="0" max="100" value="0" step="1" aria-label="Geser posisi lipatan kubus"><span class="edge-label">Tertutup</span></div>
-          <div class="control-row">
-            <button class="btn grow" id="btnOpen" type="button">↗ Buka</button>
-            <button class="btn btn-primary grow" id="btnClose" type="button">⬡ Lipat</button>
-            <button class="btn btn-auto grow" id="btnAuto" type="button" aria-pressed="false">▶ Putar Animasi</button>
-            <button class="btn" id="btnReset" type="button" title="Kembalikan posisi pandangan dan lipatan" aria-label="Reset tampilan">⟲ Reset</button>
-            <label class="speed-label" for="speedSelect">Kecepatan</label>
-            <select class="speed" id="speedSelect" aria-label="Kecepatan animasi"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select>
+        <div class="visual-stage">
+          <div class="visual-grid">
+            <figure class="visual-card">
+              <div class="visual-badge">Gambar 1</div>
+              <div class="visual-figure" aria-label="Jaring-jaring kubus berbentuk T dalam keadaan terbuka">
+                <img src="./jaring.png" alt="Foto ilustrasi jaring-jaring kubus terbuka berbentuk T dengan enam sisi bernomor" loading="lazy" decoding="async">
+              </div>
+              <figcaption><strong>Jaring-jaring terbuka</strong><span>Contoh pola T dengan 6 persegi yang diberi nomor 1–6.</span></figcaption>
+            </figure>
+            <figure class="visual-card">
+              <div class="visual-badge">Gambar 2</div>
+              <div class="visual-figure" aria-label="Kubus yang terbentuk dari jaring-jaring">
+                <img src="./kubus.png" alt="Foto ilustrasi kubus hasil pelipatan jaring-jaring dengan sisi-sisi bernomor" loading="lazy" decoding="async">
+              </div>
+              <figcaption><strong>Kubus setelah dilipat</strong><span>Perhatikan posisi sisi-sisi setelah jaring-jaring dilipat.</span></figcaption>
+            </figure>
           </div>
+          <div class="visual-note">📸 Dua gambar ini menjadi contoh untuk tugasmu: ambil satu foto saat jaring-jaring masih terbuka dan satu foto lagi saat sudah dilipat menjadi kubus.</div>
         </div>
       </section>
       <aside class="aside">
         <section class="card aside-card">
-          <h2 class="aside-heading">Cara Menggunakan</h2>
+          <h2 class="aside-heading">Cara Memahami Contoh</h2>
           <div class="steps">
-            <div class="step"><span class="step-index">1</span><div><strong>Amati pola</strong><p>Kenali enam persegi pada jaring-jaring berbentuk T, bernomor 1 sampai 6.</p></div></div>
-            <div class="step"><span class="step-index">2</span><div><strong>Coba lipat dan buka</strong><p>Tekan <b>Lipat</b> atau <b>Buka</b>. Geser pengatur untuk berhenti pada posisi tertentu.</p></div></div>
-            <div class="step"><span class="step-index">3</span><div><strong>Lihat dari arah berbeda</strong><p>Putar model dengan mouse atau sentuhan jari agar posisi sisi lebih jelas.</p></div></div>
-            <div class="step"><span class="step-index">4</span><div><strong>Temukan pasangan sisi</strong><p>Ketuk sebuah persegi. Perhatikan sisi mana yang berhadapan ketika menjadi kubus.</p></div></div>
+            <div class="step"><span class="step-index">1</span><div><strong>Amati gambar 1</strong><p>Kenali enam persegi pada jaring-jaring berbentuk T, bernomor 1 sampai 6.</p></div></div>
+            <div class="step"><span class="step-index">2</span><div><strong>Bandingkan dengan gambar 2</strong><p>Perhatikan bagaimana enam persegi pada jaring-jaring membentuk sisi-sisi kubus.</p></div></div>
+            <div class="step"><span class="step-index">3</span><div><strong>Perhatikan nomor sisi</strong><p>Nomor pada setiap sisi tetap sama. Ini akan membantu saat kamu memotret karya terbuka dan karya terlipat.</p></div></div>
+            <div class="step"><span class="step-index">4</span><div><strong>Gunakan sebagai acuan</strong><p>Tugasmu adalah membuat jaring-jaring yang berbeda dari contoh T, lalu mengirim dua foto sebagai bukti.</p></div></div>
           </div>
         </section>
         <section class="card discover-card" aria-live="polite">
           <h2 class="aside-heading">Ayo Menyelidiki!</h2>
-          <p>Menurutmu, sisi nomor berapakah yang akan saling berhadapan setelah jaring-jaring dilipat?</p>
-          <div class="discovery-result" id="discoveryResult"><strong>Sentuh salah satu sisi bernomor</strong><span>Pasangan sisi akan ditunjukkan di sini.</span></div>
+          <p>Menurutmu, sisi bernomor berapa saja yang akan saling berhadapan saat jaring-jaring dilipat?</p>
+          <div class="discovery-result" id="discoveryResult"><strong>Amati dan perkirakan!</strong><span>Kubus mempunyai tiga pasang sisi yang saling berhadapan. Gunakan nomor pada gambar untuk mencoba menemukan pasangannya.</span></div>
         </section>
         <section class="card aside-card" id="statusPengumpulan" aria-labelledby="statusTitle">
           <h2 class="aside-heading" id="statusTitle">✅ Sudah Mengumpulkan</h2>
@@ -391,12 +385,12 @@
         <section class="card aside-card">
           <h2 class="aside-heading">Tantangan Berikutnya</h2>
           <p style="font-size:12px;color:var(--secondary);margin:0">Cobalah membayangkan bentuk jaring-jaring lain yang <strong>berbeda dari huruf T</strong>. Apakah semua susunan enam persegi bisa membentuk kubus?</p>
-          <div class="hint"><span class="bulb" aria-hidden="true">💡</span><span>Setelah memahami animasinya, ikuti <strong>Misi Kreator Kubus</strong> di bawah untuk membuat jaring-jaring sendiri.</span></div>
+          <div class="hint"><span class="bulb" aria-hidden="true">💡</span><span>Setelah memahami dua gambar contoh ini, ikuti <strong>Misi Kreator Kubus</strong> di bawah untuk membuat jaring-jaring sendiri.</span></div>
         </section>
       </aside>
     </div>
     <section class="card lesson" id="misi" aria-labelledby="lessonTitle">
-      <div class="lesson-head"><p class="eyebrow" style="margin-bottom:6px">Tugas Praktik Siswa</p><h2 id="lessonTitle">✂️ Misi Kreator Kubus</h2><p>Setelah belajar melalui kubus 3D, saatnya menguji ide sendiri dengan kertas atau karton.</p></div>
+      <div class="lesson-head"><p class="eyebrow" style="margin-bottom:6px">Tugas Praktik Siswa</p><h2 id="lessonTitle">✂️ Misi Kreator Kubus</h2><p>Setelah mempelajari dua gambar contoh, saatnya menguji ide sendiri dengan kertas atau karton.</p></div>
       <div class="lesson-grid">
         <div class="lesson-steps">
           <div class="lesson-step"><span class="lesson-step-index">1</span><div><strong>Temukan pola berbeda</strong><p>Buat susunan enam persegi yang <b>berbeda dari contoh pola T</b> di laboratorium.</p></div></div>
@@ -550,16 +544,9 @@
       loginScreen.hidden = true;
       appMain.hidden = false;
       btnExit.hidden = false;
-      document.getElementById('headerStatus').textContent = 'Laboratorium 3D';
+      document.getElementById('headerStatus').textContent = 'Contoh Visual';
       window.scrollTo({ top: 0, behavior: 'instant' });
-      requestAnimationFrame(() => window.__startCubeLab?.());
-      window.__muatPengumpulan?.();
-      window.setTimeout(() => {
-        if (!window.__kubusLab && window.__accessGranted) {
-          const cover = document.getElementById('loadingCover');
-          if (cover && !cover.classList.contains('hidden')) cover.innerHTML = '<strong>Animasi 3D belum berhasil dimuat.</strong><span>Periksa koneksi internet lalu muat ulang halaman.</span>';
-        }
-      }, 16000);
+window.__muatPengumpulan?.();
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
@@ -1120,290 +1107,6 @@
       setPemberitahuan('Formulir dikosongkan. Silakan mulai dari memilih kelas.');
       kelasSiswa.focus();
     });
-  </script>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    function startCubeLab() {
-    // Hanya jalankan sekali; keluar/masuk kembali tidak menggandakan renderer.
-    if (window.__cubeStarted) return;
-    window.__cubeStarted = true;
-    const $ = (id) => document.getElementById(id);
-    const stage = $('canvasHost');
-    const cover = $('loadingCover');
-    const foldRange = $('foldRange');
-    const foldPercent = $('foldPercent');
-    const stateChip = $('stateChip');
-    const btnAuto = $('btnAuto');
-    const output = $('discoveryResult');
-
-    try {
-      if (!window.WebGLRenderingContext) throw new Error('Browser belum mendukung WebGL.');
-
-      const SIDE = 1.7;
-      const HALF = SIDE / 2;
-      const COLORS = ['#b9ece0','#c1ddfa','#f7d6b1','#f7c7ce','#d9d0fa','#f6ebb4'];
-      const opposites = { 1: 5, 2: 3, 3: 2, 4: 6, 5: 1, 6: 4 };
-      const labels = { 1: 'Atas (palang T)', 2: 'Kiri (palang T)', 3: 'Kanan (palang T)', 4: 'Batang pertama', 5: 'Batang kedua', 6: 'Ujung batang T' };
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.setClearColor(0xffffff, 0);
-      stage.appendChild(renderer.domElement);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
-      controls.enablePan = false;
-      controls.minDistance = 6;
-      controls.maxDistance = 27;
-      controls.target.set(0, -1.5 * SIDE, 0);
-      camera.position.copy(controls.target).add(new THREE.Vector3(3.8, 4.2, 12.3));
-      controls.update();
-
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xd7e9de, 2.2));
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-      keyLight.position.set(-2, 5, 9);
-      scene.add(keyLight);
-      const fillLight = new THREE.DirectionalLight(0xdff6f2, 0.8);
-      fillLight.position.set(7, -5, -8);
-      scene.add(fillLight);
-
-      const root = new THREE.Group();
-      scene.add(root);
-      const allFaces = {};
-      const hinges = [];
-      const clickable = [];
-      let selectedFace = null;
-
-      function drawFaceTexture(number, tint) {
-        const c = document.createElement('canvas');
-        c.width = 512; c.height = 512;
-        const ctx = c.getContext('2d');
-        ctx.fillStyle = tint;
-        ctx.fillRect(0, 0, 512, 512);
-        ctx.strokeStyle = '#ffffffc9';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(14, 14, 484, 484);
-        ctx.strokeStyle = '#29584b24';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(33, 33, 446, 446);
-        ctx.fillStyle = '#184841';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '800 186px system-ui, Arial, sans-serif';
-        ctx.fillText(String(number), 256, 253);
-        ctx.font = '700 33px system-ui, Arial, sans-serif';
-        ctx.fillStyle = '#37675e';
-        ctx.fillText('SISI', 256, 365);
-        const texture = new THREE.CanvasTexture(c);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
-        return texture;
-      }
-
-      function makeFace(number) {
-        const group = new THREE.Group();
-        group.name = `Sisi ${number}`;
-        const texture = drawFaceTexture(number, COLORS[number - 1]);
-        const paper = new THREE.Mesh(
-          new THREE.BoxGeometry(SIDE - 0.016, SIDE - 0.016, 0.044),
-          new THREE.MeshStandardMaterial({ color: COLORS[number - 1], roughness: .89, metalness: 0 })
-        );
-        group.add(paper);
-        const labelGeometry = new THREE.PlaneGeometry(SIDE - 0.058, SIDE - 0.058);
-        const labelMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-        const front = new THREE.Mesh(labelGeometry, labelMaterial);
-        front.position.z = 0.0235;
-        const back = new THREE.Mesh(labelGeometry, labelMaterial);
-        back.rotation.y = Math.PI;
-        back.position.z = -0.0235;
-        group.add(front, back);
-        for (const mesh of [front, back, paper]) {
-          mesh.userData.faceNumber = number;
-          clickable.push(mesh);
-        }
-        const outline = new THREE.LineSegments(
-          new THREE.EdgesGeometry(new THREE.BoxGeometry(SIDE - 0.012, SIDE - 0.012, 0.045)),
-          new THREE.LineBasicMaterial({ color: '#5b8278', transparent: true, opacity: 0.62 })
-        );
-        group.add(outline);
-        allFaces[number] = { group, outline };
-        return group;
-      }
-
-      // Pola T: 2–1–3 di bagian atas, lalu 4–5–6 ke bawah.
-      // Setiap sisi adalah anak dari engselnya. Jadi, ketika engsel berputar,
-      // sisi dan semua sisi yang menempel setelahnya ikut terlipat secara fisik.
-      const face1 = makeFace(1);
-      root.add(face1);
-      function attachFace(parentGroup, direction, number) {
-        const hinge = new THREE.Group();
-        const child = makeFace(number);
-        let x = 0, y = 0, axis = '', sign = 0;
-        if (direction === 'left') { x = -HALF; axis = 'y'; sign = 1; }
-        if (direction === 'right') { x = HALF; axis = 'y'; sign = -1; }
-        if (direction === 'up') { y = HALF; axis = 'x'; sign = 1; }
-        if (direction === 'down') { y = -HALF; axis = 'x'; sign = -1; }
-        hinge.position.set(x, y, 0);
-        child.position.set(x, y, 0);
-        hinge.add(child);
-        parentGroup.add(hinge);
-        hinges.push({ hinge, axis, sign });
-        return child;
-      }
-      attachFace(face1, 'left', 2);
-      attachFace(face1, 'right', 3);
-      const face4 = attachFace(face1, 'down', 4);
-      const face5 = attachFace(face4, 'down', 5);
-      attachFace(face5, 'down', 6);
-
-      const raycaster = new THREE.Raycaster();
-      const point = new THREE.Vector2();
-      let pointerStart = null;
-      renderer.domElement.addEventListener('pointerdown', (e) => {
-        pointerStart = { x: e.clientX, y: e.clientY, time: performance.now() };
-      });
-      renderer.domElement.addEventListener('pointerup', (e) => {
-        if (!pointerStart) return;
-        const distance = Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y);
-        pointerStart = null;
-        if (distance > 8) return;
-        const rect = renderer.domElement.getBoundingClientRect();
-        point.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        point.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(point, camera);
-        const hits = raycaster.intersectObjects(clickable, false);
-        if (hits.length) selectFace(hits[0].object.userData.faceNumber);
-      });
-      renderer.domElement.addEventListener('pointercancel', () => { pointerStart = null; });
-
-      function selectFace(n) {
-        selectedFace = n;
-        const opposite = opposites[n];
-        for (const [faceNo, item] of Object.entries(allFaces)) {
-          const num = Number(faceNo);
-          const isSelected = num === n;
-          const isOpposite = num === opposite;
-          item.outline.material.color.set(isSelected ? '#06795c' : isOpposite ? '#d67923' : '#5b8278');
-          item.outline.material.opacity = isSelected || isOpposite ? 1 : .58;
-        }
-        output.innerHTML = `<strong>Sisi ${n} berhadapan dengan sisi ${opposite}</strong><span>Ketika kubus ditutup, sisi ${n} dan ${opposite} berada pada dua bidang yang saling berhadapan. Coba putar kubus untuk memeriksanya!</span>`;
-      }
-
-      let progress = 0; // 0 = jaring-jaring datar, 1 = kubus tertutup
-      let motion = null;
-      let autoPlay = false;
-      let nextCycle = 0;
-      let speed = 1;
-      let lastFrame = performance.now();
-      const targetCenter = new THREE.Vector3();
-      const deltaTarget = new THREE.Vector3();
-
-      function applyFold(amount) {
-        progress = THREE.MathUtils.clamp(amount, 0, 1);
-        const angle = progress * Math.PI / 2;
-        for (const { hinge, axis, sign } of hinges) hinge.rotation[axis] = sign * angle;
-        targetCenter.set(0, -1.5 * SIDE * (1 - progress), HALF * progress);
-        deltaTarget.copy(targetCenter).sub(controls.target);
-        controls.target.copy(targetCenter);
-        camera.position.add(deltaTarget);
-        foldRange.value = Math.round(progress * 100);
-        foldPercent.textContent = `${Math.round(progress * 100)}% dilipat`;
-        stateChip.textContent = progress < 0.02 ? 'Jaring-jaring terbuka' : progress > .98 ? 'Kubus tertutup' : 'Sedang dilipat';
-      }
-
-      function cancelAuto() {
-        autoPlay = false;
-        nextCycle = 0;
-        btnAuto.classList.remove('is-active');
-        btnAuto.setAttribute('aria-pressed', 'false');
-        btnAuto.textContent = '▶ Putar Animasi';
-      }
-
-      function animateTo(to) {
-        if (Math.abs(to - progress) < .002) { motion = null; applyFold(to); return; }
-        motion = {
-          start: performance.now(), from: progress, to,
-          duration: Math.max(220, Math.abs(to - progress) * 2200 / speed)
-        };
-      }
-      $('btnOpen').addEventListener('click', () => { cancelAuto(); animateTo(0); });
-      $('btnClose').addEventListener('click', () => { cancelAuto(); animateTo(1); });
-      foldRange.addEventListener('input', (e) => { cancelAuto(); motion = null; applyFold(Number(e.target.value) / 100); });
-      $('speedSelect').addEventListener('change', (e) => { speed = Number(e.target.value) || 1; });
-      btnAuto.addEventListener('click', () => {
-        if (autoPlay) { cancelAuto(); motion = null; return; }
-        autoPlay = true;
-        btnAuto.classList.add('is-active');
-        btnAuto.setAttribute('aria-pressed', 'true');
-        btnAuto.textContent = 'Ⅱ Jeda Animasi';
-        animateTo(progress >= .99 ? 0 : 1);
-        if (!motion) nextCycle = performance.now() + 550;
-      });
-      $('btnReset').addEventListener('click', () => {
-        cancelAuto(); motion = null;
-        applyFold(0);
-        controls.target.set(0, -1.5 * SIDE, 0);
-        camera.position.copy(controls.target).add(new THREE.Vector3(3.8, 4.2, 12.3));
-        controls.update();
-        selectedFace = null;
-        Object.values(allFaces).forEach((item) => {
-          item.outline.material.color.set('#5b8278'); item.outline.material.opacity = .62;
-        });
-        output.innerHTML = '<strong>Sentuh salah satu sisi bernomor</strong><span>Pasangan sisi akan ditunjukkan di sini.</span>';
-      });
-
-      function resize() {
-        const width = stage.clientWidth;
-        const height = stage.clientHeight;
-        if (!width || !height) return;
-        camera.aspect = width / height;
-        // Untuk layar sempit, mundurkan kamera supaya pola T tetap utuh.
-        camera.fov = camera.aspect < .82 ? 49 : 43;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height, false);
-      }
-      const resizeObserver = new ResizeObserver(resize);
-      resizeObserver.observe(stage);
-      window.addEventListener('resize', resize);
-      applyFold(0);
-      resize();
-      cover.classList.add('hidden');
-
-      function loop(now) {
-        requestAnimationFrame(loop);
-        if (appMain.hidden) { lastFrame = now; return; }
-        const dt = Math.min((now - lastFrame) / 1000, .05);
-        lastFrame = now;
-        if (motion) {
-          const elapsed = THREE.MathUtils.clamp((now - motion.start) / motion.duration, 0, 1);
-          const eased = elapsed * elapsed * (3 - 2 * elapsed);
-          applyFold(THREE.MathUtils.lerp(motion.from, motion.to, eased));
-          if (elapsed >= 1) {
-            motion = null;
-            if (autoPlay) nextCycle = now + 700;
-          }
-        } else if (autoPlay && nextCycle && now >= nextCycle) {
-          nextCycle = 0;
-          animateTo(progress > .5 ? 0 : 1);
-        }
-        controls.update(dt);
-        renderer.render(scene, camera);
-      }
-      requestAnimationFrame(loop);
-      // Memudahkan pemeriksaan fungsi saat pengujian, tidak dipakai untuk backend.
-      window.__kubusLab = { getProgress: () => progress, getFaceCount: () => Object.keys(allFaces).length, getOpposites: () => ({ ...opposites }) };
-    } catch (error) {
-      console.error('Laboratorium 3D gagal dijalankan:', error);
-      cover.innerHTML = '<strong>Visualisasi 3D tidak dapat dijalankan.</strong><span>Pastikan perangkat terhubung ke internet dan coba buka dengan Chrome, Edge, atau Firefox versi terbaru.</span>';
-    }
-    }
-    window.__startCubeLab = startCubeLab;
-    if (window.__accessGranted) startCubeLab();
   </script>
 </body>
 </html>
